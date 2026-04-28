@@ -13,4 +13,4 @@ Important files:
     ImageSummaryApp - Main file, what actually runs the program
         BinarizingGroupFinder - accepts takes ImageBinarizer and groupfinder to create array based on image
         DistanceImageBinarizer - extends ImageBinarizer, converts image from varied colors to only black and white, based on recieved color and threshold.
-        BinaryGroupFinder - finds groups from the binarized image
+        DFSBinaryGroupFinder - finds groups from the binarized image
