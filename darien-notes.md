@@ -13,10 +13,6 @@ ImageGroupFinder gets the image, which we then loop through to output it all to 
 Implements colordistancefinder.
 Figures out the distance between two colors, but how visually different they are using the Euclidean formula.
 
-# ColorDistanceFinder
-
-The distance between two colors in a 'true' sense.
-
 # DistanceImageBinarizer
 
 Implements ImageBinarizer.
