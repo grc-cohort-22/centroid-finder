@@ -11,4 +11,6 @@ ImageSummaryApp:
 - try to parse color string into 24 bit color with new color variable
 - makes new instance of ColorDistanceFinder (This is used to find color differnce between pixels and theshold?)
 - makes new BufferedImag( this is where an image gets binarization and turns pixels into 1's, and 0's?)
-
+- finds where the image is, binarizes it and turns it into a 2d array
+- BufferedImage binaryImage turns our binaryArray into a binary imagae
+- saves the binarized image in the format of ".png"
