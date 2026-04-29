@@ -22,12 +22,11 @@ class DfsBinaryGroupFinderTest {
         Group g = groups.get(0);
 
         assertEquals(1, g.size());
-        assertEquals(1, g.centroid().x());
-        assertEquals(1, g.centroid().y());
+        assertEquals(new Coordinate(1, 1), g.centroid());
     }
 
     @Test
-    void oneLargeGroup() {
+    void singleLargeGroup() {
         int[][] image = {
                 {1, 1},
                 {1, 1}
@@ -39,37 +38,25 @@ class DfsBinaryGroupFinderTest {
         Group g = groups.get(0);
 
         assertEquals(4, g.size());
-        // coordinates: (0,0), (1,0), (0,1), (1,1)
-        // centroid: (2/4=0, 2/4=0)
-        assertEquals(0, g.centroid().x());
-        assertEquals(0, g.centroid().y());
+        // centroid: (0+1+0+1)/4 = 0, (0+0+1+1)/4 = 0
+        assertEquals(new Coordinate(0, 0), g.centroid());
     }
 
     @Test
-    void multipleGroups() {
+    void multipleSeparateGroups() {
         int[][] image = {
-                {1, 0, 0, 1},
-                {1, 0, 0, 1},
-                {0, 0, 1, 0}
+                {1, 0, 1},
+                {0, 0, 0},
+                {1, 0, 1}
         };
 
         List<Group> groups = finder.findConnectedGroups(image);
 
-        assertEquals(3, groups.size());
+        assertEquals(4, groups.size());
 
-        // Expected groups:
-        // Left vertical (size 2, centroid (0,0))
-        // Right vertical (size 2, centroid (3,0))
-        // Single pixel (size 1, centroid (2,2))
-
-        assertTrue(groups.stream().anyMatch(g ->
-                g.size() == 2 && g.centroid().x() == 0 && g.centroid().y() == 0));
-
-        assertTrue(groups.stream().anyMatch(g ->
-                g.size() == 2 && g.centroid().x() == 3 && g.centroid().y() == 0));
-
-        assertTrue(groups.stream().anyMatch(g ->
-                g.size() == 1 && g.centroid().x() == 2 && g.centroid().y() == 2));
+        for (Group g : groups) {
+            assertEquals(1, g.size());
+        }
     }
 
     @Test
@@ -82,31 +69,92 @@ class DfsBinaryGroupFinderTest {
         List<Group> groups = finder.findConnectedGroups(image);
 
         assertEquals(2, groups.size());
-
-        for (Group g : groups) {
-            assertEquals(1, g.size());
-        }
     }
 
     @Test
-    void sortingDescendingOrder() {
+    void horizontalAndVerticalConnectedOnly() {
         int[][] image = {
-                {1, 1, 0, 0},
-                {0, 0, 0, 1},
-                {0, 1, 0, 1}
+                {1, 1, 0},
+                {0, 1, 0},
+                {0, 0, 1}
         };
 
         List<Group> groups = finder.findConnectedGroups(image);
 
-        assertEquals(3, groups.size());
+        // one L-shaped group + one isolated
+        assertEquals(2, groups.size());
 
-        // sizes should be in descending order
-        assertTrue(groups.get(0).size() >= groups.get(1).size());
-        assertTrue(groups.get(1).size() >= groups.get(2).size());
+        Group largest = groups.get(0);
+        assertEquals(3, largest.size());
     }
 
     @Test
-    void sortingTieBreakerByCentroid() {
+    void centroidIntegerDivision() {
+        int[][] image = {
+                {1, 0, 1}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        assertEquals(2, groups.size());
+
+        // each is size 1 → centroid is exact
+        assertTrue(groups.stream().anyMatch(g -> g.centroid().equals(new Coordinate(0, 0))));
+        assertTrue(groups.stream().anyMatch(g -> g.centroid().equals(new Coordinate(2, 0))));
+    }
+
+    @Test
+    void centroidRoundingDown() {
+        int[][] image = {
+                {1, 1, 1}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        Group g = groups.get(0);
+
+        assertEquals(3, g.size());
+        // x = (0+1+2)/3 = 1, y = 0
+        assertEquals(new Coordinate(1, 0), g.centroid());
+    }
+
+    @Test
+    void groupsSortedDescending() {
+        int[][] image = {
+                {1, 1, 0, 0},
+                {0, 0, 0, 1},
+                {1, 1, 1, 1}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        // sizes should be sorted descending
+        for (int i = 0; i < groups.size() - 1; i++) {
+            assertTrue(groups.get(i).compareTo(groups.get(i + 1)) >= 0,
+                    "Groups are not sorted in descending order");
+        }
+    }
+
+    @Test
+    void unsortedInputStillProducesSortedOutput() {
+        int[][] image = {
+                {1, 0, 1, 1},
+                {0, 0, 0, 1},
+                {1, 0, 0, 0}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        // Expect sizes: 3, 1, 1 (descending)
+        assertEquals(3, groups.get(0).size());
+
+        for (int i = 1; i < groups.size(); i++) {
+            assertTrue(groups.get(i).size() <= groups.get(i - 1).size());
+        }
+    }
+
+    @Test
+    void tieBreakingByCentroidXThenY() {
         int[][] image = {
                 {1, 0, 1},
                 {0, 0, 0},
@@ -115,36 +163,60 @@ class DfsBinaryGroupFinderTest {
 
         List<Group> groups = finder.findConnectedGroups(image);
 
-        assertEquals(4, groups.size());
-
-        // All size 1, sorted by x then y DESCENDING (since overall is descending order)
+        // all size 1 → sorted by x then y DESC
         for (int i = 0; i < groups.size() - 1; i++) {
             Group a = groups.get(i);
             Group b = groups.get(i + 1);
 
-            int cmp = a.compareTo(b);
-            assertTrue(cmp >= 0); // descending order means earlier >= later
+            assertTrue(a.compareTo(b) >= 0);
         }
     }
 
     @Test
-    void unsortedInputStillProducesSortedOutput() {
+    void nullImageThrowsException() {
+        assertThrows(NullPointerException.class, () ->
+                finder.findConnectedGroups(null)
+        );
+    }
+
+    @Test
+    void nullRowThrowsException() {
         int[][] image = {
-                {0, 1, 0, 1},
-                {1, 1, 0, 0},
-                {0, 0, 1, 0}
+                {1, 0},
+                null
         };
 
-        List<Group> groups = finder.findConnectedGroups(image);
-
-        // Verify result is sorted regardless of traversal order
-        for (int i = 0; i < groups.size() - 1; i++) {
-            assertTrue(groups.get(i).compareTo(groups.get(i + 1)) >= 0);
-        }
+        assertThrows(NullPointerException.class, () ->
+                finder.findConnectedGroups(image)
+        );
     }
 
     @Test
-    void emptyLikeNoOnes() {
+    void nonRectangularArrayThrowsException() {
+        int[][] image = {
+                {1, 0},
+                {1}
+        };
+
+        assertThrows(IllegalArgumentException.class, () ->
+                finder.findConnectedGroups(image)
+        );
+    }
+
+    @Test
+    void invalidValuesThrowException() {
+        int[][] image = {
+                {1, 2},
+                {0, 1}
+        };
+
+        assertThrows(IllegalArgumentException.class, () ->
+                finder.findConnectedGroups(image)
+        );
+    }
+
+    @Test
+    void emptyGroupsWhenNoOnes() {
         int[][] image = {
                 {0, 0},
                 {0, 0}
@@ -153,32 +225,5 @@ class DfsBinaryGroupFinderTest {
         List<Group> groups = finder.findConnectedGroups(image);
 
         assertTrue(groups.isEmpty());
-    }
-
-    @Test
-    void nullImageThrows() {
-        assertThrows(NullPointerException.class, () ->
-                finder.findConnectedGroups(null));
-    }
-
-    @Test
-    void nullRowThrows() {
-        int[][] image = new int[2][];
-        image[0] = new int[]{1, 0};
-        image[1] = null;
-
-        assertThrows(NullPointerException.class, () ->
-                finder.findConnectedGroups(image));
-    }
-
-    @Test
-    void nonRectangularThrows() {
-        int[][] image = {
-                {1, 0},
-                {1}
-        };
-
-        assertThrows(IllegalArgumentException.class, () ->
-                finder.findConnectedGroups(image));
     }
 }
