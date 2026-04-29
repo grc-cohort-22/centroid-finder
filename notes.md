@@ -89,6 +89,13 @@ ImageGroupFinder
  ``` public BufferedImage toBufferedImage(int[][] image); ```
  - takes in a binary 2D array converts black and white pixels, black represented as x000000 white xFFFFFF
 
+BinaryGroupFinder
+  -refer to java doc
+  - input 2d array 0s, 1s,
+  - pixels horizontally/vertically up down left right
+  - The group's size is the number of pixels in the group
+  - sum of (x or y) / number of pixels of the group
+  - desc order accoruding to compareTo method based of the record (Group)
 
  ColorDistanceFinder
 - color distance between two 24-bit integers in format 0xRRGGBB each pair of hexadecimals correspond to the rgb of color
@@ -97,6 +104,26 @@ ImageGroupFinder
 - return a double
 
  ```` Classes Implementing an interface  ````
+BinarizingImageGroupFinder (implements ImageGroupFinder)
+-  ``` public List<Group> findConnectedGroups(BufferedImage image) ```
+- uses binarizer to convert BufferedImages into binary array
+- then uses BinaryGroupFinder to loacte connected groups in desc order (refer to group record)
+- return ```` List<Group> ```` 
+DistanceImageBinarizer (implements ImageBinarizer) 
+- uses ColorDistanceFinder distanceFinder, int threshold, int targetColor
+- imlements two methods
+- toBinaryArray, toBufferedImage
+- essentially methods to convert back to black and white.
 
+EuclideanColorDistance (implements ColorDistanceFinder)
+- refer to the java doc
+- ``` public double distance(int colorA, int colorB) ``` 
+- Formula: sqrt((r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2)
+- return a double
+
+ DfsBinaryGroupFinder (implements BinaryGroupFinder)
+ - method to implement ``` public List<Group> findConnectedGroups(int[][] image) ```
+ - refer to the interface BinaryGroupFinder or javadoc
 
  ```` records ````
+ 
