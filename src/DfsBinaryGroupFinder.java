@@ -44,6 +44,7 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
         
         for(int r = 0; r < row; r++) {
             for(int c = 0; c < col; c++) {
+                if(image[r][c] != 1 && image[r][c] != 0) throw new IllegalArgumentException();
                 if(image[r][c] == 1 && !visited[r][c]) {
                     List<Coordinate> result = new ArrayList<>();
                     int sumX = 0;
