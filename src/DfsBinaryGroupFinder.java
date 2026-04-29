@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class DfsBinaryGroupFinder implements BinaryGroupFinder {
@@ -39,7 +38,7 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
     @Override
     public List<Group> findConnectedGroups(int[][] image) {
         int row = image.length;
-        int col = image[row].length;
+        int col = image[0].length;
         boolean[][] visited = new boolean[row][col];
         List<Group> totalGroups = new ArrayList<>();
         
@@ -64,7 +63,7 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
     }
 
     public void dfs(int[][] image, int newRow, int newCol, boolean[][] visited, List<Coordinate> result) {
-        if(newRow < 0 || newCol < 0 || newRow > image.length || newCol > image[0].length || image[newRow][newCol] == 0 || visited[newRow][newCol]) return;
+        if(newRow < 0 || newCol < 0 || newRow >= image.length || newCol >= image[0].length || image[newRow][newCol] == 0 || visited[newRow][newCol]) return;
 
         visited[newRow][newCol] = true;
         Coordinate current = new Coordinate(newCol, newRow);
