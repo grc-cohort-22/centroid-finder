@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DfsBinaryGroupFinder implements BinaryGroupFinder {
@@ -39,23 +41,37 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
         int row = image.length;
         int col = image[row].length;
         boolean[][] visited = new boolean[row][col];
-
+        List<Group> totalGroups = new ArrayList<>();
+        
         for(int r = 0; r < row; r++) {
             for(int c = 0; c < col; c++) {
-                if(image[r][c] == 1) {
-                    dfs(image, r, c, visited);
+                if(image[r][c] == 1 && !visited[r][c]) {
+                    List<Coordinate> result = new ArrayList<>();
+                    int sumX = 0;
+                    int sumY = 0;
+                    dfs(image, r, c, visited, result);
+                    for(Coordinate crd : result) {
+                        sumX += crd.x();
+                        sumY += crd.y();
+                    }
+                    Coordinate centroid = new Coordinate(sumX / result.size(), sumY / result.size());
+                    Group g = new Group(result.size(), centroid);
+                    totalGroups.add(g);
                 }
             }
         }
-        return null;
+        return totalGroups;
     }
-    public void dfs(int[][] image, int newRow, int newCol, boolean[][] visited) {
-        if(newRow < 0 || newCol < 0 || newRow > image.length || newCol > image[0].length || image[newRow][newCol] == 0) return;
+
+    public void dfs(int[][] image, int newRow, int newCol, boolean[][] visited, List<Coordinate> result) {
+        if(newRow < 0 || newCol < 0 || newRow > image.length || newCol > image[0].length || image[newRow][newCol] == 0 || visited[newRow][newCol]) return;
 
         visited[newRow][newCol] = true;
+        Coordinate current = new Coordinate(newCol, newRow);
+        result.add(current);
 
         for(int[] move : moves) {
-            dfs(image, newRow + move[0], newCol + move[1], visited);
+            dfs(image, newRow + move[0], newCol + move[1], visited, result);
         }
     }
     
