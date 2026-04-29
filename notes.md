@@ -55,13 +55,48 @@ Coordinate
  - y increases downard, x increases to the right
  - (row:4, column:7) corresponds to (x:7, y:4)
  - 0, 0 = top left
+ <br>
 
- ```` Other notes Brendan````
+------------------------
+<br>
 
- ImageSummaryApp.java
+# Other notes ( Brendan )
+
+ ImageSummaryApp.java 
  - 3 inputs (image, hex string, Integer for threshold)
  - Euclidean color distance pixel marked white if < threshold otherwise black
  - converts binary array to buffered image returns a binarzied image to disk
  - finds connected group white pixels, bfs could be useful here
  - writes to csv file "groups.csv" format "size,x,y"
 
+<br>
+
+ ```` Interfaces ````
+
+ImageGroupFinder
+  - finds conneced groups in a image
+  - returns a List of Groups in desc order
+  - groups are sorted in desc order accrouding to groups compareTo method
+  - ``` List<Group> findConnectedGroups(BufferedImage image)```
+
+ ImageBinarizer
+ - interface used to convert between RGB imgs and black and white imgs
+ - A binary image is represented by a 2D array of integers, each pixel is black (0) or white (1)
+ two methods:
+ ```public int[][] toBinaryArray(BufferedImage image); ``` 
+ - coverts image to 2D array of 0 or 1
+ - takes in a BufferedImage in its parameter
+ ``` public BufferedImage toBufferedImage(int[][] image); ```
+ - takes in a binary 2D array converts black and white pixels, black represented as x000000 white xFFFFFF
+
+
+ ColorDistanceFinder
+- color distance between two 24-bit integers in format 0xRRGGBB each pair of hexadecimals correspond to the rgb of color
+- ``` public double distance(int colorA, int colorB); ```
+- 24-bit hex RGB integer: params colorA, colorB
+- return a double
+
+ ```` Classes Implementing an interface  ````
+
+
+ ```` records ````
