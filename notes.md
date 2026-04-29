@@ -55,3 +55,13 @@ Coordinate
  - y increases downard, x increases to the right
  - (row:4, column:7) corresponds to (x:7, y:4)
  - 0, 0 = top left
+
+ ```` Other notes Brendan````
+
+ ImageSummaryApp.java
+ - 3 inputs (image, hex string, Integer for threshold)
+ - Euclidean color distance pixel marked white if < threshold otherwise black
+ - converts binary array to buffered image returns a binarzied image to disk
+ - finds connected group white pixels, bfs could be useful here
+ - writes to csv file "groups.csv" format "size,x,y"
+
