@@ -1,4 +1,10 @@
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Stack;
 
 public class DfsBinaryGroupFinder implements BinaryGroupFinder {
    /**
@@ -33,7 +39,67 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
     // 
     @Override
     public List<Group> findConnectedGroups(int[][] image) {
-        return null;
+        List<Group> connectedGroups = new ArrayList<>();
+        
+        for(int row = 0; row < image.length; row++){
+            for(int col = 0; col < image[0].length; col++){
+                if(image[row][col] == 1){
+                    
+                }
+            }
+        }
+    }
+
+    private Group bfsHelper(int[][] image, int row, int col){
+        Group group = new Group();
+        Queue<int[]> traverse = new LinkedList<>();
+        Set<int[]> visited = new HashSet<>();
+        
+        int size = 0;
+        int[] xValues = new int[]{image.length, 0};
+        int[] yValues = new int[]{image[0].length, 0};
+        image[row][col] = 0;
+
+        int[][] directions = new int[][]{
+            {0, 1}, //DOWN
+            {0, -1}, //UP
+            {1, 0}, //RIGHT
+            {-1, 0}, //LEFT
+        };
+
+        traverse.add(new int[]{row, col});
+
+        while(!traverse.isEmpty()){
+            int[] current = traverse.poll();
+            if(visited.contains(current)){
+                continue;
+            }
+            visited.add(current);
+            size++;
+            // this calculates the min and max coordinates for x and y
+            xValues[0] = Math.min(xValues[0], current[0]);
+            xValues[1] = Math.max(xValues[1], current[0]);
+            yValues[0] = Math.min(yValues[0], current[1]);
+            yValues[1] = Math.max(yValues[1], current[1]);
+
+            image[row][col] = 0;
+
+            for(int[] direction : directions){
+                int newR = current[0] + direction[0];
+                int newC = current[1] + direction[1];
+                
+                if(newR >= 0 && newR < image.length &&
+                    newC >= 0 && newC < image[0].length &&
+                    image[newR][newC] == 1
+                ){
+                    traverse.add(new int[]{row, col});
+                }
+            }
+        }
+
+        
+
+        return group;
     }
     
 }

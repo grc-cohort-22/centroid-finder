@@ -5,3 +5,4 @@
 3.  Binarize the image
 4.  Write the binarized image to disk as "binarized.png"
 5.  Create an ImageGroupFinder using a BinarizingImageGroupFinder with a DFS-based BinaryGroupFinder
+
