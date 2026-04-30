@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class DfsBinaryGroupFinder implements BinaryGroupFinder {
@@ -60,68 +62,9 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
                 }
             }
         }
-        // sortDesc(totalGroups);
-        System.out.println(totalGroups);
+     
         return sortDesc(totalGroups);
     }
-
-    public static List<Group> sortDesc(List<Group> group){
-        if (group.isEmpty()) return new ArrayList<>(); 
-        // System.err.println(group.size());
-        List<Group> sorted = group;
-        // System.out.println("this is the entire size" + sorted.size());
-        // System.out.println(sorted.get(0));
-        // System.out.println(sorted.get(1));
-        // System.out.println();
-        System.out.println();
-        for(int i = 0; i < sorted.size(); i++){
-            
-            Group current = sorted.get(i); 
-            // System.out.println("current " + current);
-            
-            for(int j = 0; j < sorted.size() - 1; j++){
-                
-                Group next = sorted.get(j + 1);
-                // System.out.println("next " + next);
-                int comp = current.compareTo(next);
-                // System.out.println("comparing:" + current + " to " + next);
-                // System.out.println("comp " + comp);
-                // System.out.println();
-
-                if(comp == 0){
-                    continue;
-                }
-                
-                if(comp < 0){
-                    sorted.set(i, next);
-                    // System.out.println("current sorting: " + sorted);
-                    sorted.set(j + 1, current);
-                    current = next;
-                    // System.out.println("current sorting: " + sorted);
-                    // System.out.println(current + " is less than " + next);
-                }
-
-                /*
-                    [Group[size=3, centroid=Coordinate[x=2, y=0]], Group[size=1, centroid=Coordinate[x=0, y=0]],  Group[size=1, centroid=Coordinate[x=0, y=2]]]
-                */
-
-                if (comp > 0) {
-                    continue;
-                }
-
-                
-            }
-
-            /*
-                    int[][] image = {
-                        {1, 0, 1, 1},
-                        {0, 0, 0, 1},
-                        {1, 0, 0, 0}
-                };
-            */
-        }
-
-        return sorted;
 
         /*
             if group is less than or greater return otherwise if theyre equal
@@ -131,10 +74,15 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
             we need o(n^2) time complexity
             group(0) to group(1) we want this comparison
 
+            this is is reliant on the fact that we use collections.sort() in the beginning 
+            
             inner for loop
             check(this.compareTo(other)) > < = (1) (-1) (0) the other group 
+
                 if our current is greater than our current[0]
-                
+                current  =  list.get(0)
+
+
                 [1, 2, 3, 4, 5, 6, 7]
 
                 1.compare(2) returns -1 swap
@@ -164,12 +112,32 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
                 ...
                 [7, 6, 5, 4, 3, 2, 1]
 
-
-
-
-
         */
+    
+    public static List<Group> sortDesc(List<Group> group){
+        Collections.sort(group);
+
+        if (group.isEmpty()) return new ArrayList<>();
+    
+        for(int i = 0; i < group.size(); i++){
+           
+            Group current = group.get(0);
+           
+            for(int j = 0; j < group.size() - 1; j++){
+                Group next = group.get(j + 1);
+                int comp = current.compareTo(next);
+            
+                if(comp < 0){
+                    group.set(j, next);
+                    group.set(j + 1, current);
+                }
+            }
+        }
+
+
+        return group;
     }
+    
     // rSize 3 cSize 4  newRow = 2 newCol = 0  result = [[1,3], [2, 3], [2, 2], [2, 1], [2, 0]]
     // movements down (+1, 0)
     public void dfs(int[][] image, int newRow, int newCol, boolean[][] visited, List<Coordinate> result) {
