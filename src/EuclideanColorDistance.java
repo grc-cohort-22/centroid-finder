@@ -19,6 +19,15 @@ public class EuclideanColorDistance implements ColorDistanceFinder {
      */
     @Override
     public double distance(int colorA, int colorB) {
-        return 0;
+        int[] colorA_RGB = convertHexToRGB(colorA);
+        int[] colorB_RGB = convertHexToRGB(colorB);
+    }
+
+    private int[] convertHexToRGB(int color) {
+        int red = (color >> 16) & 0xFF;
+        int green = (color >> 8) & 0xFF;
+        int blue = (color) & 0xFF;
+
+        return new int[]{red, green, blue};
     }
 }
