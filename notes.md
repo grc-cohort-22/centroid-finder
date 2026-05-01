@@ -14,3 +14,7 @@ ImageSummaryApp:
 - finds where the image is, binarizes it and turns it into a 2d array
 - BufferedImage binaryImage turns our binaryArray into a binary imagae
 - saves the binarized image in the format of ".png"
+- creates an ImageGroupFinder using BinarizinGImageGroupFinder and passes in binarizer and DfsBinaryGroupFinder();
+- calls groupFinder.findConnectedGroups(inputImage)
+- returns a List of type Group
+- loops through each Group and writes it to "groups.csv" 
