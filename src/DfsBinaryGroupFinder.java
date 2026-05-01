@@ -41,6 +41,7 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
     public List<Group> findConnectedGroups(int[][] image) {
         int row = image.length;
         int col = image[0].length;
+        checkRectangular(image);
         boolean[][] visited = new boolean[row][col];
         List<Group> totalGroups = new ArrayList<>();
         // row 3 col 4
@@ -156,6 +157,15 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
 
         for(int[] move : moves) {
             dfs(image, newRow + move[0], newCol + move[1], visited, result);
+        }
+    }
+
+    private void checkRectangular(int[][] image) {
+        int col = image[0].length;
+        for (int i = 0; i < image.length; i++) {
+            if (image[i].length != col) {
+                throw new IllegalArgumentException("Cannot be non-rectangular array");
+            }
         }
     }
     
