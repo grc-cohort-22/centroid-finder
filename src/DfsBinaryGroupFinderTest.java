@@ -154,25 +154,6 @@ class DfsBinaryGroupFinderTest {
     }
 
     @Test
-    void tieBreakingByCentroidXThenY() {
-        int[][] image = {
-                {1, 0, 1},
-                {0, 0, 0},
-                {1, 0, 1}
-        };
-
-        List<Group> groups = finder.findConnectedGroups(image);
-
-        // all size 1 → sorted by x then y DESC
-        for (int i = 0; i < groups.size() - 1; i++) {
-            Group a = groups.get(i);
-            Group b = groups.get(i + 1);
-
-            assertTrue(a.compareTo(b) >= 0);
-        }
-    }
-
-    @Test
     void nullImageThrowsException() {
         assertThrows(NullPointerException.class, () ->
                 finder.findConnectedGroups(null)
@@ -225,5 +206,199 @@ class DfsBinaryGroupFinderTest {
         List<Group> groups = finder.findConnectedGroups(image);
 
         assertTrue(groups.isEmpty());
+    }
+
+    @Test
+    void tieBreakingByCentroidXThenY() {
+        int[][] image = {
+                {1, 0, 1},
+                {0, 0, 0},
+                {1, 0, 1}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        // all size 1 → sorted by x then y DESC
+        for (int i = 0; i < groups.size() - 1; i++) {
+            Group a = groups.get(i);
+            Group b = groups.get(i + 1);
+
+            assertTrue(a.compareTo(b) >= 0);
+        }
+    }
+
+    @Test
+    void tieBreaking_CenterWithEdgePositions() {
+        int[][] image = {
+                {1, 0, 0, 0, 1},
+                {0, 0, 0, 0, 0},
+                {0, 0, 1, 0, 0},
+                {0, 0, 0, 0, 0},
+                {1, 0, 0, 0, 1}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        for (int i = 0; i < groups.size() - 1; i++) {
+            Group a = groups.get(i);
+            Group b = groups.get(i + 1);
+            assertTrue(a.compareTo(b)>= 0);
+        }
+    }
+
+    @Test
+    void tieBreaking_CornerOfcubeOnes() {
+        int[][] image = {
+                {1, 1, 0, 1, 1},
+                {1, 1, 0, 1, 1},
+                {0, 0, 0, 0, 0},
+                {1, 1, 0, 1, 1},
+                {1, 1, 0, 1, 1}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        for (int i = 0; i < groups.size() - 1; i++) {
+            Group a = groups.get(i);
+            Group b = groups.get(i + 1);
+            assertTrue(a.compareTo(b)>= 0);
+        }
+    }
+
+    @Test
+    void singleIsland_snakeShape() {
+        int[][] image = {
+                {1, 1, 0, 0},
+                {0, 1, 1, 0},
+                {0, 0, 1, 1},
+                {0, 0, 0, 1}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        assertEquals(1, groups.size());
+    }
+
+    @Test
+    void singleIsland_XShapeSize() {
+        int[][] image = {
+                {1, 0, 0, 0, 1},
+                {0, 1, 0, 1, 0},
+                {0, 0, 1, 0, 0},
+                {0, 1, 0, 1, 0},
+                {1, 0, 0, 0, 1}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        assertEquals(9, groups.size());
+    }
+
+    @Test
+    void singleIsland_XShape() {
+        int[][] image = {
+                {1, 0, 0, 0, 1},
+                {0, 1, 0, 1, 0},
+                {0, 0, 1, 0, 0},
+                {0, 1, 0, 1, 0},
+                {1, 0, 0, 0, 1}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        for (int i = 0; i < groups.size() - 1; i++) {
+            Group a = groups.get(i);
+            Group b = groups.get(i + 1);
+            assertTrue(a.compareTo(b)>= 0);
+        }
+    }
+
+    @Test
+    void singleIsland_TriangleShape() {
+        int[][] image = {
+                {1, 1, 1, 1, 1},
+                {0, 1, 1, 1, 1},
+                {0, 0, 1, 1, 1},
+                {0, 0, 0, 1, 1},
+                {1, 0, 0, 0, 1}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        for (int i = 0; i < groups.size() - 1; i++) {
+            Group a = groups.get(i);
+            Group b = groups.get(i + 1);
+            assertTrue(a.compareTo(b)>= 0);
+        }
+
+        assertEquals(2, groups.size());
+    }
+
+    @Test
+    void tieBreaking_sameSizeDifferentShapes() {
+        int[][] image = {
+                {1, 0, 1},
+                {1, 0, 1},
+                {0, 0, 0},
+                {1, 1, 0}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        for (int i = 0; i < groups.size() - 1; i++) {
+            Group a = groups.get(i);
+            Group b = groups.get(i + 1);
+
+            assertTrue(a.compareTo(b) >= 0);
+        }
+
+        assertEquals(3, groups.size());
+    }
+
+    @Test
+    void tieBreaking_largeSquareSameSizes() {
+        int[][] image = {
+                {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                {0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        for (int i = 0; i < groups.size() - 1; i++) {
+            Group a = groups.get(i);
+            Group b = groups.get(i + 1);
+
+            assertTrue(a.compareTo(b) >= 0);
+        }
+
+        assertEquals(20, groups.size());
+    }
+
+    @Test
+    void tieBreaking_multipleSingleCellIslands_irregular() {
+        int[][] image = {
+                {0, 1, 0, 0, 1},
+                {0, 0, 0, 0, 0},
+                {1, 0, 0, 1, 0},
+                {0, 0, 1, 0, 0}
+        };
+
+        List<Group> groups = finder.findConnectedGroups(image);
+
+        for (int i = 0; i < groups.size() - 1; i++) {
+            Group a = groups.get(i);
+            Group b = groups.get(i + 1);
+            assertTrue(a.compareTo(b) >= 0);
+        }
+
+        assertEquals(5, groups.size());
     }
 }
