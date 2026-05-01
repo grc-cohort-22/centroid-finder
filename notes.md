@@ -10,6 +10,7 @@ DistanceImageBinarizer: Converts the given BufferedImage into a binary 2D array 
 
 ImageGroupFinder:Finds connected groups in an image. The groups are sorted in DESCENDING order according to Group's compareTo method.It returns connected groups in an image sorted in descending order
 
-BinarizingImageGroupFinder:
+BinarizingImageGroupFinder: Finds connected groups of white pixels in the given image. using ImageBinarizer.
+ 
 DfsBinaryGroupFinder:
 Group:
