@@ -58,34 +58,25 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
     // int size: a counter for size
     // int sumx: a sum of all the x coordinate
     // int sumy: a sum of all the y coordinate
-    class GroupStats {
-        int size;
-        int sumX;
-        int sumY;
-        GroupStats(int size, int sumX, int sumY) {
-            this.size = size;
-            this.sumX = sumX;
-            this.sumY = sumY;
-        }
-    }
-
-    public GroupStats findConnectedGroups(int[][] image, int r, int c, int[][] moves) {
+    //int[] {size, sumx, sumy}.
+    public int[] findConnectedGroups(int[][] image, int r, int c, int[][] moves) {
         if (r < 0 || r >= image.length ||
             c < 0 || c >= image[0].length ||
             image[r][c] == 0) {
-                return new GroupStats(0, 0, 0);
+                return new int[]{0,0,0};
         }
-        GroupStats result = new GroupStats(1, c, r);
+        int[] result = new int[]{1, c, r};
         image[r][c] = 0;
 
         for (int[] move : moves) {
             int curR = move[0] + r;
             int curC = move[1] + c;
 
-            GroupStats current = findConnectedGroups(image, curR, curC, moves);
-            result.size += current.size;
-            result.sumX += current.sumX;
-            result.sumY += current.sumY;
+            int[] current = findConnectedGroups(image, curR, curC, moves);
+
+            result[0] += current[0];
+            result[1] += current[1];
+            result[2] += current[2];
             
         }
         return result;
