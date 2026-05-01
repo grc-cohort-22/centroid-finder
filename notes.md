@@ -14,4 +14,4 @@ BinarizingImageGroupFinder: Finds connected groups of white pixels in the given 
 
 DfsBinaryGroupFinder:Finds connected pixel groups of 1s in an integer array representing a binary image. The input is a non-empty rectangular 2D array containing only 1s and 0s The input is a non-empty rectangular 2D array containing only 1s and 0s The top-left cell of the array (row:0, column:0) is considered to be coordinate(x:0, y:0). Y increases downward and X increases to the right. For example,(row:4, column:7) corresponds to (x:7, y:4). The method returns a list of sorted groups. The group's size is the number of pixels in the group. The centroid of the group,is computed as the average of each of the pixel locations across each dimension.The groups are sorted in DESCENDING order according to Group's compareTo method
 
-Group:
+Group:Groups are naturally comparable. The comparison is done first by the group's size, then by the x coordinate of the centroid, and finally by the y coordinate. In a method that returns groups, they should be sorted in this natural order.
