@@ -11,6 +11,14 @@ import java.awt.image.BufferedImage;
  * The color distance is computed using a provided ColorDistanceFinder, which defines how to compare two colors numerically.
  * The targetColor is represented as a 24-bit RGB integer in the form 0xRRGGBB.
  */
+
+    /* ADDING NOTES / STEPS */
+    // This constructor initializes the DistanceImageBinarizer with the values needed for binarization.
+    // It takes a ColorDistanceFinder to calculate how different a pixel’s color is from a target color.
+    // The targetColor is the reference color, stored as a 24-bit RGB value (0xRRGGBB).
+    // The threshold determines the cutoff: pixels closer than the threshold become white (1),
+    // while pixels farther away become black (0).
+
 public class DistanceImageBinarizer implements ImageBinarizer {
     private final ColorDistanceFinder distanceFinder;
     private final int threshold;
@@ -29,6 +37,14 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      * @param targetColor the reference color as a 24-bit hex RGB integer (0xRRGGBB)
      * @param threshold the distance threshold used to decide whether a pixel is white or black
      */
+
+    /* ADDING NOTES / STEPS */
+    // The constructor sets up how the image will be converted to black and white.
+    // It takes a ColorDistanceFinder to measure how different two colors are.
+    // The targetColor is the reference color, stored as a 24-bit RGB value (0xRRGGBB).
+    // The threshold acts as a cutoff: pixels close to the target become white (1),
+    // while pixels farther away become black (0).
+ 
     public DistanceImageBinarizer(ColorDistanceFinder distanceFinder, int targetColor, int threshold) {
         this.distanceFinder = distanceFinder;
         this.targetColor = targetColor;
@@ -43,6 +59,11 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      * @param image the input RGB BufferedImage
      * @return a 2D binary array where 1 represents white and 0 represents black
      */
+
+    /* ADDING NOTES / STEPS */
+    // The toBinaryArray method loops through every pixel in the image, computes its distance
+    // from the target color, and stores either 0 or 1 in a 2D array based on the threshold.
+    
     @Override
     public int[][] toBinaryArray(BufferedImage image) {
         return null;
@@ -56,10 +77,16 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      * @param image a 2D array of 0s and 1s representing the binary image
      * @return a BufferedImage where black and white pixels are represented with standard RGB hex values
      */
+
+    /* ADDING NOTES / STEPS */
+    // The toBufferedImage method does the reverse: it takes a 2D array of 0s and 1s and
+    // creates an image where 1 becomes white (0xFFFFFF) and 0 becomes black (0x000000).
+    // Together, these methods convert between a full-color image and a simplified binary version.
+   
     @Override
     public BufferedImage toBufferedImage(int[][] image) {
         return null;
     }
 }
 
-// mines
+

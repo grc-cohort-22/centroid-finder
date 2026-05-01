@@ -64,6 +64,6 @@ public record Group(int size, Coordinate centroid) implements Comparable<Group> 
   the groups are supposed to be in descending order using the groups compareTO method, with the largest group being first, smallest --> last, ties are browken
   the desceding y value first then the descending x
 
-  you;re supposed ot teturn it as a CSV row representing the group size and coordinates
+  you're supposed to return it as a CSV row representing the group size and coordinates
    
    */
