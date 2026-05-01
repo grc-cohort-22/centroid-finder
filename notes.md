@@ -6,7 +6,8 @@ EuclideanColorDistance:The Euclidean color distance is calculated by treating ea
 
 ImageBinarizer: Converts the given BufferedImage into a binary 2D array or Converts a binary 2D array into a BufferedImage. Each entry in the returned array is either 0 or 1, representing a black or white pixel. Black pixels should be represented as x000000 and white pixels should be represented as xFFFFFF.
 
-DistanceImageBinarizer:
+DistanceImageBinarizer: Converts the given BufferedImage into a binary 2D array using color distance and a threshold. Each entry in the returned array is either 0 or 1, representing a black or white pixel. Converts a binary 2D array into a BufferedImage.return BufferedImage.
+
 ImageGroupFinder:
 BinarizingImageGroupFinder:
 DfsBinaryGroupFinder:
