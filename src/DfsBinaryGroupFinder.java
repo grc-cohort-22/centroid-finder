@@ -56,14 +56,21 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
                         sumX += crd.x(); // 0 + 0 | 1 + 2 + 2 + 2 + 2  sum = 9
                         sumY += crd.y(); // 0 + 1 | 3 + 3 + 2 + 1 + 0 sum 9
                     }
-                    Coordinate centroid = new Coordinate(sumX / result.size(), sumY / result.size());
+                    Coordinate centroid = new Coordinate(sumX / result.size(), sumY / result.size()); // result: sumX = 1,  sumY = 1
                     Group g = new Group(result.size(), centroid);
                     totalGroups.add(g);
                 }
             }
         }
-     
+        
+        //  int[][] image = {
+        //         {1, 1, 0, 0},
+        //         {0, 0, 0, 1},
+        //         {1, 1, 1, 1}
+        // };
+
         return sortDesc(totalGroups);
+        // [Group[size=5, centroid=Coordinate[x=1, y=1]], Group[size=2, centroid=Coordinate[x=0, y=0]]]
     }
 
         /*
@@ -137,7 +144,7 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
 
         return group;
     }
-    
+
     // rSize 3 cSize 4  newRow = 2 newCol = 0  result = [[1,3], [2, 3], [2, 2], [2, 1], [2, 0]]
     // movements down (+1, 0)
     public void dfs(int[][] image, int newRow, int newCol, boolean[][] visited, List<Coordinate> result) {
