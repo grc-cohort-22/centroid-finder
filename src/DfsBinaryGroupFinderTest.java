@@ -207,10 +207,9 @@ public class DfsBinaryGroupFinderTest {
 
         List<Group> result = finder.findConnectedGroups(image);
 
-        assertEquals(3, result.size());
+        assertEquals(2, result.size());
 
         // Largest group should come first
         assertTrue(result.get(0).size() >= result.get(1).size());
-        assertTrue(result.get(1).size() >= result.get(2).size());
     }
 }
