@@ -19,6 +19,7 @@ public class EuclideanColorDistance implements ColorDistanceFinder {
      */
     @Override
     public double distance(int colorA, int colorB) {
+        
         return 0;
     }
 }
