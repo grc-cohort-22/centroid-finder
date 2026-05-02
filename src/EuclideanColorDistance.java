@@ -19,11 +19,6 @@ public class EuclideanColorDistance implements ColorDistanceFinder {
      */
     @Override
     public double distance(int colorA, int colorB) {
-        if (colorA < 0 || colorA > 0xFFFFFF ||
-            colorB < 0 || colorB > 0xFFFFFF) {
-            throw new IllegalArgumentException();
-        }
-
         return hexToRGB(colorA, colorB);
     }
 

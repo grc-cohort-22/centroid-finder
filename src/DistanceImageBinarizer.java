@@ -73,7 +73,7 @@ public class DistanceImageBinarizer implements ImageBinarizer {
         int black = 0x000000;
         int white = 0xFFFFFF;
 
-        BufferedImage monochromeImage = new BufferedImage(image.length, image[0].length, BufferedImage.TYPE_INT_RGB);
+        BufferedImage monochromeImage = new BufferedImage(image[0].length, image.length, BufferedImage.TYPE_INT_RGB);
 
         for(int row = 0; row < image.length; row++){
             for(int col = 0; col < image[row].length; col++){
