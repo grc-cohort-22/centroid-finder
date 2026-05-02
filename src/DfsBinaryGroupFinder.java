@@ -39,35 +39,27 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
             for(int r = 0; r < image.length; r++){
                 for(int c = 0; c < image[0].length; c++){
 
-                        GroupStats stats = validMovesAndSize(image, r, c);
-                        int avgX = 0;
-                        int avgY = 0;
+                    GroupStats stats = validMovesAndSize(image, r, c);
+                    int avgX = 0;
+                    int avgY = 0;
 
-                        if(stats.size() > 0){
-                            avgX = stats.sumX() / stats.size();
-                            avgY = stats.sumY() / stats.size();
-                            System.out.println(avgX + " x ");
-                            System.out.println(avgY + " y ");
-                            System.out.println(stats.size() + "size");
-                        }
+                    if(stats.size() > 0){
+                        avgX = stats.sumX() / stats.size();
+                        avgY = stats.sumY() / stats.size();
+                        System.out.println(avgX + " x ");
+                        System.out.println(avgY + " y ");
+                        System.out.println(stats.size() + "size");
+                    }
                         
 
-                        if( stats.size() != 0){
-                            Group group = new Group(stats.size(), new Coordinate(avgX, avgY));
-                                groups.add(group);
+                    if( stats.size() != 0){
+                        Group group = new Group(stats.size(), new Coordinate(avgX, avgY));
+                        groups.add(group);
 
-                        }
-
-                    
+                    }
                 }
-            }
-
-
-
-                
-            groups.sort(null);
-            Collections.reverse(groups);
-            
+            } 
+        groups.sort(Collections.reverseOrder());
         return groups;
     }
 
@@ -121,28 +113,23 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
 
         if(image.length == 0 || image[0].length == 0) throw new IllegalArgumentException();
 
-        for(int row = 0; row < image.length; row++){
-            for(int col = 0; col < image[row].length; col++){
-                if(image[row] == null){
-                    throw new NullPointerException();
-                }
-            }
-        }
-        for(int row = 0; row < image.length; row++){
-                if(image[row] == null){
-                    throw new NullPointerException();
-                }
-                if(image[row].length != image[0].length){
-                    throw new IllegalArgumentException();
-                }
-            for(int col = 0; col < image[row].length; col++){
+        int cols = image[0].length;
 
-                if(image[row][col] != 0 && image[row][col] != 1){
+        for(int row = 0; row < image.length; row++){
+            if(image[row] == null){
+                throw new NullPointerException();
+            }
+
+            if (image[row].length != cols) {
+                throw new IllegalArgumentException();
+            }
+
+            for (int col = 0; col < image[row].length; col++) {
+                if(image[row][col] != 0 && image[row][col] != 1) {
                     throw new IllegalArgumentException();
                 }
             }
         }
-
         return true;
     }
     
