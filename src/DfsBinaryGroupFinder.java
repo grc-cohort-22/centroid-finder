@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DfsBinaryGroupFinder implements BinaryGroupFinder {
@@ -29,8 +31,69 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
     * @return the found groups of connected pixels in descending order
     */
     @Override
-    public List<Group> findConnectedGroups(int[][] image) {
-        return null;
+    public List<Group> findConnectedGroups(int[][] image) {  
+        // edge cases
+        if (image == null || image.length == 0 || image[0] == null) throw new NullPointerException();    
+
+        List<Group> connectedGroups = new ArrayList<>();
+
+        // Traverses every cell
+        for(int row = 0; row < image.length; row++){
+            for(int col = 0; col < image[0].length; col++){
+                // check if its a 0 or 1
+                if (image[row][col] != 0 && image[row][col] != 1) throw new NullPointerException();
+
+                // Starts dfs when finding unvisited 1
+                if(image[row][col] == 1){
+
+                    // stats[0] = size
+                    // stats[1] = sum of x values 
+                    // stats[2] = sum of y values 
+                    int[] stats = new int[3];
+
+                    dfs(image, row, col, stats);
+
+                    // calculate centroids
+                    int size = stats[0];
+                    int centroidX = stats[1] / size;
+                    int centroidY = stats[2] / size;
+
+                    // Create and store group
+                    connectedGroups.add(new Group(size, new Coordinate(centroidX, centroidY)));
+                }
+            }
+        }
+        
+        // sort by descending order
+        Collections.sort(connectedGroups, Collections.reverseOrder());
+
+        return connectedGroups;
     }
+
+    private void dfs(int[][] image, int row, int col, int[] stats) {
+        // Check if, out of bounds or if cell == 0
+        if (row < 0 || col < 0 || row >= image.length || 
+        col >= image[0].length || image[row][col] == 0) {
+            return;
+        }
+
+        // Mark current cell as visited
+        image[row][col] = 0;
+        
+        // Update group statistics
+        stats[0]++;         // size
+        stats[1] += col;    //  x sum
+        stats[2] += row;    //  y sum
+
+        // Explore possible moves
+        dfs(image, row - 1, col, stats); // UP
+        dfs(image, row + 1, col, stats); // DOWN
+        dfs(image, row, col - 1, stats); // LEFT
+        dfs(image, row, col + 1, stats); // RIGHT
+
+    }
+
+    }
+
     
-}
+
