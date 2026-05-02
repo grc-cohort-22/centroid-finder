@@ -71,6 +71,32 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
 
     }
 
+    private static List<int[]> possibleMoves(int[][] image, int[] current) {
+        List<int[]> moves = new ArrayList<>();
+
+        int curR = current[0];
+        int curC = current[1];
+
+        int[][] directions = {
+            {1,0}, //down
+            {-1,0}, //up
+            {0,1}, //right
+            {0,-1} //left
+        };
+
+        for(int[] direction: directions){
+            int newR = curR + direction[0];
+            int newC = curC + direction[1];
+
+            if(newR >= 0 && newR < image.length && newC >=0 && newC < image[0].length) {
+                moves.add(new int[] {newR, newC});
+            }
+        }
+
+        return moves;
+
+    }
+
     public static int[] findConnectedGroupsLocation(int[][] image) {
         for (int row = 0; row < image.length; row++) {
             for (int col = 0; col < image[0].length; col++) {
