@@ -9,6 +9,7 @@ public class EuclideanColorDistanceTest {
         EuclideanColorDistance finder = new EuclideanColorDistance();
 
         double actual = finder.distance(0xFF0000, 0xFF0000);
+        System.out.println("actual = " + actual);
 
         assertEquals(0.0, actual, 0.001);
     }
@@ -71,7 +72,7 @@ public class EuclideanColorDistanceTest {
 
         double actual = finder.distance(0x123456, 0x654321);
 
-        assertEquals(88.334, actual, 0.001);
+        assertEquals(99.614, actual, 0.001);
     }
 
     @Test
