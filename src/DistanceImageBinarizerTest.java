@@ -47,4 +47,20 @@ public class DistanceImageBinarizerTest {
         assertArrayEquals(expected, binarizer.toBinaryArray(image));
     }  
 
+  @Test
+    public void testToBinaryArrayDifferentFromTargetBecomesBlack() {
+        BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+        image.setRGB(0, 0, 0x0000FF);
+
+        DistanceImageBinarizer binarizer =
+            new DistanceImageBinarizer(new EuclideanColorDistance(), 0xFF0000, 10);
+
+        int[][] expected = {
+            {0}
+        };
+
+        assertArrayEquals(expected, binarizer.toBinaryArray(image));
+    }
+   
+
 }
