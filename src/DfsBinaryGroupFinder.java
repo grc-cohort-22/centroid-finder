@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DfsBinaryGroupFinder implements BinaryGroupFinder {
@@ -30,7 +32,73 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
     */
     @Override
     public List<Group> findConnectedGroups(int[][] image) {
-        return null;
+        if (image == null) {
+            throw new NullPointerException();
+        }
+
+        if (image.length == 0) {
+            throw new IllegalArgumentException();
+        }
+
+        int rows = image.length;
+        int cols = image[0].length;
+
+        boolean[][] visited = new boolean[rows][cols];
+        List<Group> groups = new ArrayList<>();
+
+        for (int row = 0; row < image.length; row++) {
+            for (int col= 0; col < image[0].length; col++) {
+                if (image[row][col] == 1 && !visited[row][col]) {
+                    int[] result = dfs(image, row, col, visited);
+
+                    int size = result[0];
+                    int sumX = result[1];
+                    int sumY = result[2];
+
+                    int centroidX = sumX / size;
+                    int centroidY = sumY / size;
+
+                    groups.add(new Group(size, new Coordinate(centroidX, centroidY)));
+                }
+            }
+        }
+
+        Collections.sort(groups, Collections.reverseOrder());
+
+        return groups;
+    }
+
+    private int[] dfs(int[][] image, int row, int col, boolean[][] visited) {
+        if (row < 0 || col < 0 || row >= image.length || col >= image[0].length) {
+            return new int[]{0, 0, 0};
+        }
+
+        if (image[row][col] == 0 || visited[row][col]) {
+            return new int[]{0, 0, 0};
+        }
+
+        visited[row][col] = true;
+
+        int size = 1;
+        int sumX = col; 
+        int sumY = row; 
+
+        int[][] directions = {
+            {-1, 0}, // up
+            {1, 0}, // down 
+            {0, -1}, // left
+            {0, 1} // right 
+        };
+
+        for (int[] dir : directions) {
+            int[] result = dfs(image, row + dir[0], col + dir[1], visited);
+
+            size += result[0];
+            sumX += result[1];
+            sumY += result[2];
+        }
+
+        return new int[]{size, sumX, sumY};
     }
     
 }
