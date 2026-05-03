@@ -1,3 +1,4 @@
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.image.BufferedImage;
@@ -30,5 +31,20 @@ public class DistanceImageBinarizerTest {
             return null; 
         }
     }
+
+    @Test
+    public void testToBinaryArraySameAsTargetBecomesWhite() {
+        BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+        image.setRGB(0, 0, 0xFF0000);
+
+        DistanceImageBinarizer binarizer =
+            new DistanceImageBinarizer(new EuclideanColorDistance(), 0xFF0000, 10);
+
+        int[][] expected = {
+            {1}
+        };
+
+        assertArrayEquals(expected, binarizer.toBinaryArray(image));
+    }  
 
 }
