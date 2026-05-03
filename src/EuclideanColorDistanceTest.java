@@ -2,6 +2,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EuclideanColorDistanceTest {
+    
     @Test
     public void testSameColorDistanceIsZero() {
         EuclideanColorDistance dist = new EuclideanColorDistance();
@@ -62,5 +63,12 @@ public class EuclideanColorDistanceTest {
         double expected = Math.sqrt(255 * 255 + 255 * 255);
 
         assertEquals(expected, dist.distance(0xFF0000, 0x00FF00), 0.0001);
+    }
+
+    @Test
+    public void testDistanceNonNegative() {
+        EuclideanColorDistance dist = new EuclideanColorDistance();
+        double result = dist.distance(0x123456, 0x654321);
+        assertTrue(result >= 0);
     }
 }
