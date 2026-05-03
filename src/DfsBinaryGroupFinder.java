@@ -34,7 +34,6 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
     public List<Group> findConnectedGroups(int[][] image) {
         if(!findConnectedGroupsErrorCheck(image)) return null;
 
-        // int index = 0;
         List<Group> groups = new ArrayList<>();
             for(int r = 0; r < image.length; r++){
                 for(int c = 0; c < image[0].length; c++){
@@ -51,7 +50,6 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
                         System.out.println(stats.size() + "size");
                     }
                         
-
                     if( stats.size() != 0){
                         Group group = new Group(stats.size(), new Coordinate(avgX, avgY));
                         groups.add(group);
@@ -73,7 +71,6 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
 
         if(image[row][col] == 0) return empty;
 
-        
         int size = 1;
         int x = col;
         int y = row;
@@ -106,8 +103,6 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
         return group;
     }
 
-
-
     private boolean findConnectedGroupsErrorCheck(int[][] image){
         if(image == null) throw new NullPointerException();
 
@@ -119,11 +114,9 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
             if(image[row] == null){
                 throw new NullPointerException();
             }
-
             if (image[row].length != cols) {
                 throw new IllegalArgumentException();
             }
-
             for (int col = 0; col < image[row].length; col++) {
                 if(image[row][col] != 0 && image[row][col] != 1) {
                     throw new IllegalArgumentException();
