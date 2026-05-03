@@ -61,6 +61,27 @@ public class DistanceImageBinarizerTest {
 
         assertArrayEquals(expected, binarizer.toBinaryArray(image));
     }
+
+    @Test
+    public void testToBinaryArrayMultiplePixels() {
+        BufferedImage image = new BufferedImage(2, 2, BufferedImage.TYPE_INT_RGB);
+
+        image.setRGB(0, 0, 0xFF0000); // red
+        image.setRGB(1, 0, 0xFE0000); // close red
+        image.setRGB(0, 1, 0x0000FF); // blue
+        image.setRGB(1, 1, 0x00FF00); // green
+
+        DistanceImageBinarizer binarizer =
+            new DistanceImageBinarizer(new EuclideanColorDistance(), 0xFF0000, 5);
+
+        int[][] expected = {
+            {1, 1},
+            {0, 0}
+        };
+
+        assertArrayEquals(expected, binarizer.toBinaryArray(image));
+    }
+
    
 
 }
