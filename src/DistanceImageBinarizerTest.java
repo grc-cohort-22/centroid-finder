@@ -96,4 +96,20 @@ public class DistanceImageBinarizerTest {
         assertEquals(0xFFFFFF, result.getRGB(1, 1) & 0xFFFFFF);
     }
 
+        @Test
+        public void testToBufferedImageWidthAndHeight() {
+        int[][] binary = {
+            {1, 0, 1},
+            {0, 1, 0}
+        };
+
+        DistanceImageBinarizer binarizer =
+            new DistanceImageBinarizer(new EuclideanColorDistance(), 0xFF0000, 10);
+
+        BufferedImage result = binarizer.toBufferedImage(binary);
+
+        assertEquals(3, result.getWidth());
+        assertEquals(2, result.getHeight());
+    }
+
 }
