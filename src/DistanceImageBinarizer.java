@@ -1,4 +1,5 @@
 import java.awt.image.BufferedImage;
+import java.nio.Buffer;
 
 /**
  * An implementation of the ImageBinarizer interface that uses color distance
@@ -45,7 +46,24 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      */
     @Override
     public int[][] toBinaryArray(BufferedImage image) {
-        return null;
+        int[][] array = new int[image.getHeight()][image.getWidth()];
+        DistanceImageBinarizer dib = new DistanceImageBinarizer(distanceFinder, targetColor, threshold);
+        
+        for(int r = 0; r < array.length;r++){
+            for(int c = 0; c < array[0].length;c++){
+                int color = image.getRGB(c, r) & 0xffffff;
+                double diff = dib.distanceFinder.distance(color, targetColor);
+                if(diff < threshold){
+                    array[r][c] = 1;
+                }
+                if(diff > threshold){
+                    array[r][c] = 0;
+                }
+            }
+        }
+        
+
+        return array;
     }
 
     /**
@@ -58,6 +76,17 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      */
     @Override
     public BufferedImage toBufferedImage(int[][] image) {
-        return null;
+        BufferedImage bi = new BufferedImage(image[0].length, image.length, BufferedImage.TYPE_INT_RGB);
+        for(int r = 0; r < image.length; r++){
+            for(int c = 0;c < image[0].length;c++){
+                if(image[r][c] == 1){
+                    bi.setRGB(c, r, 0xffffff);
+                }
+                if(image[r][c] == 0){
+                    bi.setRGB(c, r, 0x0000);
+                }
+            }
+        }
+        return bi;
     }
 }
