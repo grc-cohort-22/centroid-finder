@@ -22,3 +22,7 @@ DfsBinaryGroupFinder -> EuclideanColorDistance -> DistanceImageBinarizer -> Bina
 - Uses Groups (size of image/array and position of centroid as Coordinate)
 - Uses Coordinates (int x and int y representing positions in the image array)
  
+2. EuclideanColorDistance
+
+- Each color int in method is represented as a 24-bit hex integer
+- Need to extract seperate RGB colors from original color integer
