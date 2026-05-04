@@ -44,7 +44,7 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      * @return a 2D binary array where 1 represents white and 0 represents black
      */
     @Override
-    public int[][] toBinaryArray(BufferedImage image) {
+    public int[][] toBinaryArray(BufferedImage image) {        
         return null;
     }
 
@@ -58,6 +58,16 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      */
     @Override
     public BufferedImage toBufferedImage(int[][] image) {
-        return null;
+        BufferedImage output = new BufferedImage(image[0].length, image.length, BufferedImage.TYPE_INT_RGB);
+
+        for(int height = 0; height < image.length; height++){
+            for(int width = 0; width < image[0].length; width++){
+                if(image[height][width] == 1){
+                    output.setRGB(width, height, 0xFFFFFF);
+                }
+            }
+        }
+
+        return output;
     }
 }
