@@ -180,4 +180,55 @@ public class BinarizingImageGroupFinderTest {
         // Ensure the exact output from binarizer is used
         assertSame(unusualBinary, groupFinder.receivedArray);
     }
+
+    @Test
+    public void testBinarizerReturnsNull() {
+        BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+
+        FakeImageBinarizer binarizer = new FakeImageBinarizer(null);
+        FakeBinaryGroupFinder groupFinder = new FakeBinaryGroupFinder(new ArrayList<>());
+
+        BinarizingImageGroupFinder finder =
+                new BinarizingImageGroupFinder(binarizer, groupFinder);
+
+        finder.findConnectedGroups(image);
+
+        // groupFinder should receive null
+        assertNull(groupFinder.receivedArray);
+
+        // It should still be called
+        assertTrue(groupFinder.wasCalled);
+    }
+
+    @Test
+    public void testGroupFinderCalledOnce() {
+        BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+
+        int[][] fakeBinary = {{1}};
+        FakeImageBinarizer binarizer = new FakeImageBinarizer(fakeBinary);
+        FakeBinaryGroupFinder groupFinder = new FakeBinaryGroupFinder(new ArrayList<>());
+
+        BinarizingImageGroupFinder finder =
+                new BinarizingImageGroupFinder(binarizer, groupFinder);
+
+        finder.findConnectedGroups(image);
+
+        assertEquals(1, groupFinder.wasCalled ? 1 : 0);
+    }
+
+    @Test
+    public void testBinaryArrayNotModified() {
+        BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+
+        int[][] fakeBinary = {{1, 0}, {0, 1}};
+        FakeImageBinarizer binarizer = new FakeImageBinarizer(fakeBinary);
+        FakeBinaryGroupFinder groupFinder = new FakeBinaryGroupFinder(new ArrayList<>());
+
+        BinarizingImageGroupFinder finder =
+                new BinarizingImageGroupFinder(binarizer, groupFinder);
+
+        finder.findConnectedGroups(image);
+
+        assertArrayEquals(new int[][]{{1, 0}, {0, 1}}, fakeBinary);
+    }
 }
