@@ -136,4 +136,40 @@ public class EuclideanColorDistanceTest {
 
         assertEquals(3, rgb.size(), "RGB list should always have exactly 3 elements");
     }
+
+    @Test
+    void testRedIncreaseByOne() {
+        int colorA = 0x000000; // (0,0,0)
+        int colorB = 0x010000; // (1,0,0)
+
+        assertEquals(1.0, distanceFinder.distance(colorA, colorB), 1e-9);
+    }
+
+    @Test
+    void testRedAndGreenIncreaseByOne() {
+        int colorA = 0x000000; // (0,0,0)
+        int colorB = 0x010100; // (1,1,0)
+
+        double expected = Math.sqrt(2); // √(1² + 1²)
+
+        assertEquals(expected, distanceFinder.distance(colorA, colorB), 1e-9);
+    }
+
+    @Test
+    void testSmallColorFromBlack() {
+        int black = 0x000000;
+        int small = 0x010203; // (1,2,3)
+
+        double expected = Math.sqrt(1 + 4 + 9); // √14
+
+        assertEquals(expected, distanceFinder.distance(black, small), 1e-9);
+    }
+
+    @Test
+    void testSimpleMidValues() {
+        int colorA = 0x0A0A0A; // (10,10,10)
+        int colorB = 0x0B0A0A; // (11,10,10)
+
+        assertEquals(1.0, distanceFinder.distance(colorA, colorB), 1e-9);
+    }
 }
