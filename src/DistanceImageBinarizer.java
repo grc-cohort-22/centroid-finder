@@ -47,8 +47,17 @@ public class DistanceImageBinarizer implements ImageBinarizer {
     public int[][] toBinaryArray(BufferedImage image) {
         int imageHeight = image.getHeight();
         int imageWidth = image.getWidth();
-
+        int xCoord = image.getMinTileX();
+        int yCoord = image.getMinTileY();
         int[][] returnArray = new int[imageHeight][imageWidth];
+
+        for(int yCheck = yCoord; yCheck < imageHeight; yCheck++){
+            for(int xCheck = xCoord; xCheck < xCheck; xCheck++){
+                
+            }
+        }
+
+        
         return returnArray;
     }
 
