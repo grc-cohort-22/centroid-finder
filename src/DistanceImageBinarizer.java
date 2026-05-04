@@ -50,6 +50,7 @@ public class DistanceImageBinarizer implements ImageBinarizer {
         for(int height = 0; height < image.getHeight(); height++){
             for(int width = 0; width < image.getWidth(); width++){
                 int color = image.getRGB(width, height);
+                color = color & 0x00FFFFFF;
                 
                 if(distanceFinder.distance(color, targetColor) < threshold){
                     newImage[height][width] = 1;
@@ -74,8 +75,8 @@ public class DistanceImageBinarizer implements ImageBinarizer {
     public BufferedImage toBufferedImage(int[][] image) {
         BufferedImage output = new BufferedImage(image[0].length, image.length, BufferedImage.TYPE_INT_RGB);
 
-        for(int height = 0; height < image.length; height++){
-            for(int width = 0; width < image[0].length; width++){
+        for(int height = 0; height < image[0].length; height++){
+            for(int width = 0; width < image.length; width++){
                 if(image[height][width] == 1){
                     output.setRGB(width, height, 0xFFFFFF);
                 }
