@@ -56,6 +56,22 @@ Interface for finding connected groups of 1s in a 2D integer array.
   - y centroid = sum of all y coordinates / number of pixels in group
 - Groups sorted in DESCENDING order by `Group.compareTo()`: size first, then descending y, then descending x.
 
+/* FRED'S NOTES 
+   If array / subarray are null throw a NullPointerException
+   if array is invlaud throw an IllegalArgumentException
+   
+   the top left (x: 0, y: 0) y increases downward as x increases to the right. eg row:4 column:7 corresponds to x:7, y:4
+
+   we are supposed to return a list of sorted groups , the size being the number of pixels in the group, the centroid being the average of each picel location
+   eg
+   x coordinate of centroid is the sum of all x coordinates / number of pixela in the group --> basically the average
+   y coordinate of centroid is the sum of all y coordinates / number of pixela in rhe group --> basically the average
+
+  the groups are supposed to be in descending order using the groups compareTO method, with the largest group being first, smallest --> last, ties are browken
+  the desceding y value first then the descending x
+   
+   */
+
 ---
 
 ## DfsBinaryGroupFinder
@@ -65,3 +81,57 @@ Interface for finding connected groups of 1s in a 2D integer array.
 - Centroid (x, y) -- sum of coordinates divided by group size using INTEGER DIVISION
 
 Blobs are connected horizontally and vertically, NOT diagonally.
+
+## Coordinate
+ /* FRED'S NOTES 
+this is where the location of the image / array 
+top left is x:0, y:0 , y increases downward as x does to the right
+ */
+
+ ## DistanceImageBinarizer
+ /* FRED NOTES
+    // This constructor initializes the DistanceImageBinarizer with the values needed for binarization.
+    // It takes a ColorDistanceFinder to calculate how different a pixel’s color is from a target color.
+    // The targetColor is the reference color, stored as a 24-bit RGB value (0xRRGGBB).
+    // The threshold determines the cutoff: pixels closer than the threshold become white (1),
+    // while pixels farther away become black (0).
+
+     // The constructor sets up how the image will be converted to black and white.
+    // It takes a ColorDistanceFinder to measure how different two colors are.
+    // The targetColor is the reference color, stored as a 24-bit RGB value (0xRRGGBB).
+    // The threshold acts as a cutoff: pixels close to the target become white (1),
+    // while pixels farther away become black (0).
+
+    // The toBinaryArray method loops through every pixel in the image, computes its distance
+    // from the target color, and stores either 0 or 1 in a 2D array based on the threshold.
+    
+    // The toBufferedImage method does the reverse: it takes a 2D array of 0s and 1s and
+    // creates an image where 1 becomes white (0xFFFFFF) and 0 becomes black (0x000000).
+    // Together, these methods convert between a full-color image and a simplified binary version.
+
+*/
+
+## GROUP
+/* FRED NOTES
+   This is is the group of the contiguous pixel
+   
+   the top left (x: 0, y: 0) --> y increases downward as x increases to the right. eg row:4 column:7 corresponds to x:7, y:4
+
+   we are supposed to return a list of sorted groups , the size being the number of pixels in the group, 
+   the centroid being the average of each picel location
+   eg
+   x coordinate of centroid is the sum of all x coordinates / number of pixela in the group --> basically the average
+   y coordinate of centroid is the sum of all y coordinates / number of pixela in rhe group --> basically the average
+
+  the groups are supposed to be in descending order using the groups compareTO method, with the largest group being first, smallest --> last, ties are browken
+  the desceding y value first then the descending x
+
+  you're supposed to return it as a CSV row representing the group size and coordinates
+   
+   */
+    
+## IMAGEGROUP FINDER
+/* FRED'S NOTES 
+    Here you basically find the connected grops, the groups are sorted in descending order using the compareTO method
+    You return the connected gropus in descending order
+ */
