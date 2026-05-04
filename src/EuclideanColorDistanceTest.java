@@ -243,4 +243,22 @@ public class EuclideanColorDistanceTest {
         assertEquals(distanceFinder.distance(0xFF0000, 0x00FF00),
                      distanceFinder.distance(0x00FF00, 0xFF0000), EPSILON);
     }
+      @Test
+    public void testSameColorDistance() {
+        EuclideanColorDistance d = new EuclideanColorDistance();
+        assertEquals(0.0, d.distance(0x112233, 0x112233));
+    }
+
+    @Test
+    public void testBlackWhiteDistance() {
+        EuclideanColorDistance d = new EuclideanColorDistance();
+        double expected = Math.sqrt(255*255 + 255*255 + 255*255);
+        assertEquals(expected, d.distance(0x000000, 0xFFFFFF));
+    }
+
+    @Test
+    public void testRedDifferenceOnly() {
+        EuclideanColorDistance d = new EuclideanColorDistance();
+        assertEquals(255.0, d.distance(0xFF0000, 0x000000));
+    }
 }
