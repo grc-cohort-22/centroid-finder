@@ -550,4 +550,49 @@ public class DfsBinaryGroupFinderTest {
         assertEquals(1, groups.get(0).centroid().x());
         assertEquals(1, groups.get(0).centroid().y());
     }
+
+    @Test
+    public void testSinglePixelGroup() {
+        DfsBinaryGroupFinder finder = new DfsBinaryGroupFinder();
+
+        int[][] grid = {
+            {0,0},
+            {0,1}
+        };
+
+        List<Group> result = finder.findConnectedGroups(grid);
+
+        assertEquals(1, result.size());
+        assertEquals(1, result.get(0).size());
+    }
+
+    @Test
+    public void testOneBigGroup() {
+        DfsBinaryGroupFinder finder = new DfsBinaryGroupFinder();
+
+        int[][] grid = {
+            {1,1},
+            {1,1}
+        };
+
+        List<Group> result = finder.findConnectedGroups(grid);
+
+        assertEquals(1, result.size());
+        assertEquals(4, result.get(0).size());
+    }
+
+    @Test
+    public void testMultipleGroups() {
+        DfsBinaryGroupFinder finder = new DfsBinaryGroupFinder();
+
+        int[][] grid = {
+            {1,0},
+            {0,1}
+        };
+
+        List<Group> result = finder.findConnectedGroups(grid);
+
+        assertEquals(2, result.size());
+    }
+}
 }
