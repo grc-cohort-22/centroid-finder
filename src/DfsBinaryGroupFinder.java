@@ -52,7 +52,7 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
     private List<Group> findConnectedGroupsHelper(int[][] image, boolean[][] seen) {
         List<Group> groups = new ArrayList<>();
         for(int r = 0; r < image.length; r++) { // row is actually the y coordinate 
-            for(int c = 0; c < image[r].length; c++) { // column is actualy the x coordinate
+            for(int c = 0; c < image[r].length; c++) { // column is actually the x coordinate
                 if(image[r][c] == 1 && !seen[r][c]) { 
                     Group group = dfs(image, seen, c, r);
                     groups.add(group);
