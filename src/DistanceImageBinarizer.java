@@ -53,7 +53,7 @@ public class DistanceImageBinarizer implements ImageBinarizer {
 
         for(int yCheck = yCoord; yCheck < imageHeight; yCheck++){
             for(int xCheck = xCoord; xCheck < xCheck; xCheck++){
-                
+
             }
         }
 
