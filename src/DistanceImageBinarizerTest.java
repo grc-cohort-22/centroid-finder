@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,5 +61,29 @@ public class DistanceImageBinarizerTest {
         assertTrue(matrix[0].length == expectedWidth,
             "Matrix column count should equal image width for tall image");
     }
-    
+    @Test
+    void testBinaryValuesAreAccurate() {
+        int width = 3;
+        int height = 3;
+
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        // Set pixel (0,0) to pure white — far from black (targetColor=0), distance > 0
+        // With threshold=0, distance >= 0 is always true, so this pixel should be 1
+        image.setRGB(0, 0, new Color(255, 255, 255).getRGB());
+
+        // Set pixel (1,1) to pure black — matches targetColor exactly, distance = 0
+        // With threshold=0, distance >= 0 is still true, so this should also be 1
+        image.setRGB(1, 1, new Color(0, 0, 0).getRGB());
+
+        int[][] matrix = binarizer.toBinaryArray(image);
+
+        // White pixel at (col=0, row=0) → matrix[0][0] should be 1
+        assertTrue(matrix[0][0] == 1,
+            "White pixel far from target color should return 1 when threshold is 0");
+
+        // Black pixel at (col=1, row=1) → matrix[1][1] should be 1
+        assertTrue(matrix[1][1] == 1,
+            "Black pixel at distance 0 from target should still return 1 when threshold is 0");
+    }
 }
