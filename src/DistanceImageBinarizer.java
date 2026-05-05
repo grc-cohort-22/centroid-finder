@@ -90,7 +90,7 @@ public class DistanceImageBinarizer implements ImageBinarizer {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int currentPixelColor = image.getRGB(x, y);
+                int currentPixelColor = image.getRGB(x, y) & 0xFFFFFF;
                 double distance = distanceFinder.distance(currentPixelColor, targetColor);
                 if (distance < threshold) {
                     result[y][x] = 1;
