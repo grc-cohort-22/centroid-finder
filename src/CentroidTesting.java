@@ -255,4 +255,60 @@ public class CentroidTesting {
         assertEquals(0x000000, result.getRGB(0, 1) & 0xFFFFFF);
         assertEquals(0xFFFFFF, result.getRGB(1, 1) & 0xFFFFFF);
     }
+    @Test
+    public void testFindConnectedGroups_singleGroup() {
+        ImageBinarizer binarizer = new ImageBinarizer() {
+            @Override
+            public int[][] toBinaryArray(BufferedImage image) {
+                return new int[][]{
+                    {1, 1},
+                    {1, 1}
+                };
+            }
+
+            @Override
+            public BufferedImage toBufferedImage(int[][] image) {
+                return null;
+            }
+        };
+
+        BinaryGroupFinder groupFinder = new DfsBinaryGroupFinder();
+        BinarizingImageGroupFinder finder = new BinarizingImageGroupFinder(binarizer, groupFinder);
+
+        BufferedImage img = new BufferedImage(2, 2, BufferedImage.TYPE_INT_RGB);
+        List<Group> result = finder.findConnectedGroups(img);
+
+        assertEquals(1, result.size());
+        assertEquals(4, result.get(0).size());
+    }
+
+    @Test
+    public void testFindConnectedGroups_multipleGroups() {
+        ImageBinarizer binarizer = new ImageBinarizer() {
+            @Override
+            public int[][] toBinaryArray(BufferedImage image) {
+                return new int[][]{
+                    {1, 0, 1},
+                    {0, 0, 0},
+                    {1, 0, 1}
+                };
+            }
+
+            @Override
+            public BufferedImage toBufferedImage(int[][] image) {
+                return null;
+            }
+        };
+
+        BinaryGroupFinder groupFinder = new DfsBinaryGroupFinder();
+        BinarizingImageGroupFinder finder = new BinarizingImageGroupFinder(binarizer, groupFinder);
+
+        BufferedImage img = new BufferedImage(3, 3, BufferedImage.TYPE_INT_RGB);
+        List<Group> result = finder.findConnectedGroups(img);
+
+        assertEquals(4, result.size());
+        for (Group g : result) {
+            assertEquals(1, g.size());
+        }
+    }
 }
