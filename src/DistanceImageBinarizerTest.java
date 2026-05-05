@@ -96,10 +96,10 @@ public class DistanceImageBinarizerTest {
 
         BufferedImage result = binarizer.toBufferedImage(image);
 
-        assertEquals(result.getRGB(0, 0), -1);
-        assertEquals(result.getRGB(1, 0), -16777216);
-        assertEquals(result.getRGB(0, 1), -16777216);
-        assertEquals(result.getRGB(1, 1), -1);
+        assertEquals(result.getRGB(0, 0), -16777216);
+        assertEquals(result.getRGB(1, 0), -1);
+        assertEquals(result.getRGB(0, 1), -1);
+        assertEquals(result.getRGB(1, 1), -16777216);
 
     }
 }
