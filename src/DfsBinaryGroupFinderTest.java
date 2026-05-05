@@ -2,7 +2,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CentroidFinderTest {
+public class DfsBinaryGroupFinderTest {
 
     private final DfsBinaryGroupFinder finder = new DfsBinaryGroupFinder();
 
