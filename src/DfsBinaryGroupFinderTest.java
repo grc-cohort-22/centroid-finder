@@ -7,10 +7,6 @@ public class DfsBinaryGroupFinderTest {
 
     private final DfsBinaryGroupFinder finder = new DfsBinaryGroupFinder();
 
-    // -------------------------
-    // 1. VALIDATION TESTS
-    // -------------------------
-
     @Test
     void nullImage_throwsException() {
         assertThrows(NullPointerException.class, () -> finder.findConnectedGroups(null));
@@ -43,9 +39,6 @@ public class DfsBinaryGroupFinderTest {
         assertThrows(IllegalArgumentException.class, () -> finder.findConnectedGroups(image));
     }
 
-    // -------------------------
-    // 2. BASIC FUNCTIONALITY
-    // -------------------------
 
     @Test
     void singlePixelGroup() {

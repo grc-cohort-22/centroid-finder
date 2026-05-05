@@ -84,9 +84,9 @@ public class DistanceImageBinarizer implements ImageBinarizer {
         for(int row = 0; row < image.length ; row++){
             for(int column = 0; column < image[0].length; column++){
                 if(image[row][column] == 1){
-                    returnImage.setRGB(column, row, white.getRGB());
-                }else{
                     returnImage.setRGB(column, row, black.getRGB());
+                }else{
+                    returnImage.setRGB(column, row, white.getRGB());
                 }
             }
         }
