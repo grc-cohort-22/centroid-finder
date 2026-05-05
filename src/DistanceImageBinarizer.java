@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 /**
@@ -15,6 +16,8 @@ public class DistanceImageBinarizer implements ImageBinarizer {
     private final ColorDistanceFinder distanceFinder;
     private final int threshold;
     private final int targetColor;
+    private final Color white = new Color(255, 255, 255);
+    
 
     /**
      * Constructs a DistanceImageBinarizer using the given ColorDistanceFinder,
@@ -52,12 +55,16 @@ public class DistanceImageBinarizer implements ImageBinarizer {
         int[][] returnArray = new int[imageHeight][imageWidth];
 
         for(int yCheck = yCoord; yCheck < imageHeight; yCheck++){
-            for(int xCheck = xCoord; xCheck < xCheck; xCheck++){
-
+            for(int xCheck = xCoord; xCheck < imageWidth; xCheck++){
+                int getRGBColor = image.getRGB(xCheck, yCheck);
+                Color colorConvert = new Color(getRGBColor, false);
+                if(distanceFinder.distance(colorConvert.getRGB(), targetColor) >= threshold){
+                    returnArray[yCheck][xCheck] = 1;
+                }else{
+                    returnArray[yCheck][xCheck] = 0;
+                }
             }
         }
-
-        
         return returnArray;
     }
 

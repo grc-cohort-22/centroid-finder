@@ -60,4 +60,5 @@ public class DistanceImageBinarizerTest {
         assertTrue(matrix[0].length == expectedWidth,
             "Matrix column count should equal image width for tall image");
     }
+    
 }
