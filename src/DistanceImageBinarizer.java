@@ -34,6 +34,35 @@ public class DistanceImageBinarizer implements ImageBinarizer {
         this.targetColor = targetColor;
         this.threshold = threshold;
     }
+    /*
+    NOTES:
+    java.awt.image.BufferedImage is a class that contains and provides getRGB and setRGB
+    more on: https://docs.oracle.com/javame/config/cdc/opt-pkgs/api/agui/jsr209/java/awt/image/BufferedImage.html
+        int getRGB(int x, int y) : getRGB returns the pixel colors at coordinates (x,y) as an integer.
+        void setRGB(int x, int y, int rgb) : Sets the pixel at (x, y) to the specified ARGB integer value.
+        int getHeight() : returns the height of the bufferedImage
+        int getWidth() : returns the width of the bufferedImage
+
+    there are two methods:
+        one is to convert bufferedImage into binary array
+        the other is to convert binary array into bufferedImage
+    so first method converts colorful image into 2d array of 1's and 0's, then second method converts the 2d array into black and white image.
+
+    - toBinaryArray would require getRGB (which returns an int), we take the int of each pixel and convert it into 1 or 0 in the array.
+    - toBufferedImage would require setRGB (a void that sets pixel location (x,y) to a color),
+        based on the param of 2d array of 1's and 0's, we create a new BufferedImage and set each pixel location corresponding with
+        image array row and col to the either black or white.
+    
+    distanceFinder: is passed using EuclideanColorDistance, so we can call the method in there.
+    targerColor: is another 24-bit hex RGB integer, i believe we call distanceFinder.distance(
+        targetColor,
+        getRGB from bufferedImage image in the first method
+    )
+    threshold: distanceFinder.distance will return an int, we compare int threshold with the return result.
+
+    When creating a new image, you can use the below to start the instance:
+        new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
 
     /**
      * Converts the given BufferedImage into a binary 2D array using color distance and a threshold.
@@ -45,7 +74,33 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      */
     @Override
     public int[][] toBinaryArray(BufferedImage image) {
-        return null;
+        //loop over row and col using a nested for loop via getHeight() and getWidth()
+            // grab the color of each current pixel,
+            // call distanceFinder.distance that takes two colors, returning distance, use params:
+                // - targetColor
+                // - current pixel getRGB
+            // compare results of distanceFinder.distance with threshold
+            // if current distance is less thanthreshold, set result[y][x] to white (1)
+            // else, set result[y][x] to black (0)
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        int[][] result = new int[height][width];
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int currentPixelColor = image.getRGB(x, y) & 0xFFFFFF;
+                double distance = distanceFinder.distance(currentPixelColor, targetColor);
+                if (distance < threshold) {
+                    result[y][x] = 1;
+                } else {
+                    result[y][x] = 0;
+                }
+                // to be continued...
+            }
+        }
+        return result;
     }
 
     /**
@@ -58,6 +113,26 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      */
     @Override
     public BufferedImage toBufferedImage(int[][] image) {
-        return null;
+        //create image via new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        // loop over image via nested loop, row and col
+            // grab the value of the current iteration int value (either 1 or 0)
+            // if current value equal 1
+                //set the image pixel via setRBG() using params x, y, and the color 0xFFFFFF (white)
+            // if current value equal 0
+                //set the image pixel via setRGB() using params x, y, and the color 0x000000 (black).
+        int height = image.length;
+        int width = image[0].length;
+        BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int current = image[y][x];
+                if (current == 1) {
+                    result.setRGB(x,y,0xFFFFFF);
+                } else {
+                    result.setRGB(x,y,0x000000);
+                }
+            }
+        }
+        return result;
     }
 }

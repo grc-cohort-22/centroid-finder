@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DfsBinaryGroupFinder implements BinaryGroupFinder {
@@ -30,7 +32,71 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
     */
     @Override
     public List<Group> findConnectedGroups(int[][] image) {
-        return null;
+        // image variable is a 2d array that has a bunch of 1's and 0's
+        // if image is null, throw NullPointerException
+        // if array is invalid, throw IllegalArgumentException.
+
+        // the group datatype contains int size, coordinates centroid.
+            // the coordinates datatype contains int x, int y.
+        //int size: should contain all the number of pixels in the current iteration cell
+        //coordinates centroid: should contain basically the center coordinates of the current iteration cell
+        List<Group> result = new ArrayList<>();
+        if (image == null) {
+            throw new NullPointerException();
+        }
+        for (int[] row : image) {
+            if (row == null || row.length != image[0].length) {
+                throw new IllegalArgumentException("Array must be rectangular and non-null.");
+            }
+        }
+        int[][] directions = {{-1,0},{1,0},{0,-1},{0,1}};
+        for (int r = 0; r < image.length; r++) {
+            for (int c = 0; c < image[0].length; c++) {
+                if (image[r][c] == 1) {
+                    // List<Group> current = findConnectedGroups(image, r, c, directions);
+                    // result.addAll()
+                    int[] currentInfo = dfs(image, r, c, directions);
+                    // we need to create a coordinate class using the avg of sumx and sumy, 
+                    // create a group class using int size and coordinate class
+                    //once we created a group, add that group into the List of Group (result)
+                    int size = currentInfo[0];
+                    int avgX = currentInfo[1] / size;
+                    int avgY = currentInfo[2] / size;
+                    Coordinate centroid = new Coordinate(avgX, avgY);
+                    Group currentGroup = new Group(size, centroid);
+                    result.add(currentGroup);
+                    
+                }
+            }
+        }
+        result.sort(Collections.reverseOrder());
+        return result;
+    }
+    // int size: a counter for size
+    // int sumx: a sum of all the x coordinate
+    // int sumy: a sum of all the y coordinate
+    //int[] {size, sumx, sumy}.
+    public int[] dfs(int[][] image, int r, int c, int[][] moves) {
+        if (r < 0 || r >= image.length ||
+            c < 0 || c >= image[0].length ||
+            image[r][c] == 0) {
+                return new int[]{0,0,0};
+        }
+        int[] result = new int[]{1, c, r};
+        image[r][c] = 0;
+
+        for (int[] move : moves) {
+            int curR = move[0] + r;
+            int curC = move[1] + c;
+
+            int[] current = dfs(image, curR, curC, moves);
+
+            result[0] += current[0];
+            result[1] += current[1];
+            result[2] += current[2];
+            
+        }
+        return result;
     }
     
 }

@@ -2,14 +2,14 @@
 
 ## *DO THIS FIRST* Wave 0: AI Rules 
 AI is *NOT ALLOWED* for generating implementations of the classes.
-AI is allowed for helping you make test cases.
+AI is allowed for helping you make test  cases.
 
 Don't have it just create the tests mindlessly for you though! Make sure you're actively involved in making the tests.
 
 DO NOT MIX HUMAN AND AI COMMITS.
 EVERY COMMIT THAT USES AI MUST START WITH THE COMMIT MESSAGE "AI Used" AND IT MUST ONLY CREATE/ALTER TEST FILES
 
-For this wave, please have each partner make a commit below with their username acknowledging that they understand the rules, according to the following format:
+For this wave, please have each partner make a commit below with their username acknowledging that they understand the rules, according to the following format:~
 
 "I, YOUR_GITHUB_USERNAME, understand that AI is ONLY to be used for tests, and that every commit that I use AI for must start with 'AI Used'"
 
