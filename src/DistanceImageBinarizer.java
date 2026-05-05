@@ -17,6 +17,7 @@ public class DistanceImageBinarizer implements ImageBinarizer {
     private final int threshold;
     private final int targetColor;
     private final Color white = new Color(255, 255, 255);
+    private final Color black = new Color(0, 0, 0);
     
 
     /**
@@ -63,7 +64,7 @@ public class DistanceImageBinarizer implements ImageBinarizer {
                 }else{
                     returnArray[yCheck][xCheck] = 0;
                 }
-                
+
             }
         }
         return returnArray;
@@ -80,6 +81,15 @@ public class DistanceImageBinarizer implements ImageBinarizer {
     @Override
     public BufferedImage toBufferedImage(int[][] image) {
         BufferedImage returnImage = new BufferedImage(image[0].length, image.length, BufferedImage.TYPE_INT_RGB);
+        for(int row = 0; row < image.length ; row++){
+            for(int column = 0; column < image[0].length; column++){
+                if(image[row][column] == 1){
+                    returnImage.setRGB(column, row, white.getRGB());
+                }else{
+                    returnImage.setRGB(column, row, black.getRGB());
+                }
+            }
+        }
         return returnImage;
     }
 }

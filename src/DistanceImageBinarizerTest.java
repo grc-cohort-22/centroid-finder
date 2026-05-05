@@ -86,4 +86,20 @@ public class DistanceImageBinarizerTest {
         assertTrue(matrix[1][1] == 1,
             "Black pixel at distance 0 from target should still return 1 when threshold is 0");
     }
+    @Test
+    void testToBufferedImage(){
+
+        int[][] image = {
+            {1, 0},
+            {0, 1}
+        };
+
+        BufferedImage result = binarizer.toBufferedImage(image);
+
+        assertEquals(result.getRGB(0, 0), -1);
+        assertEquals(result.getRGB(1, 0), -16777216);
+        assertEquals(result.getRGB(0, 1), -16777216);
+        assertEquals(result.getRGB(1, 1), -1);
+
+    }
 }
