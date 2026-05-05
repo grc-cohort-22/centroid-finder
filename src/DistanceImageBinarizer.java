@@ -63,6 +63,7 @@ public class DistanceImageBinarizer implements ImageBinarizer {
                 }else{
                     returnArray[yCheck][xCheck] = 0;
                 }
+                
             }
         }
         return returnArray;
