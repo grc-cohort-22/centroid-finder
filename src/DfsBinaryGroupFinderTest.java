@@ -595,4 +595,3 @@ public class DfsBinaryGroupFinderTest {
         assertEquals(2, result.size());
     }
 }
-}
