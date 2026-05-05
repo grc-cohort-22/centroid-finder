@@ -1,4 +1,8 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class DfsBinaryGroupFinder implements BinaryGroupFinder {
    /**
@@ -30,7 +34,82 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
     */
     @Override
     public List<Group> findConnectedGroups(int[][] image) {
-        return null;
+        if(image == null) throw new NullPointerException();
+        for(int[] row : image) {
+            if(row == null) throw new NullPointerException();
+            if(row.length != image[0].length) throw new IllegalArgumentException();
+            for(int pixel : row) { 
+                if(pixel != 0 && pixel != 1) throw new IllegalArgumentException(); 
+            }
+        }
+
+        boolean[][] visited = new boolean[image.length][image[0].length];
+        List<Group> groups = findConnectedGroupsHelper(image, visited);
+        Collections.sort(groups, Collections.reverseOrder());
+        return groups;
     }
-    
+
+    private List<Group> findConnectedGroupsHelper(int[][] image, boolean[][] seen) {
+        List<Group> groups = new ArrayList<>();
+        for(int r = 0; r < image.length; r++) { // row is actually the y coordinate 
+            for(int c = 0; c < image[r].length; c++) { // column is actually the x coordinate
+                if(image[r][c] == 1 && !seen[r][c]) { 
+                    Group group = dfs(image, seen, c, r);
+                    groups.add(group);
+                }
+            }
+        }
+        return groups;
+    }
+
+    private static Group dfs(int[][] image, boolean[][] visited, int x, int y) { 
+        Queue<int[]> imageQueue = new LinkedList<>();
+        imageQueue.add(new int[]{x, y});
+
+        int xTotal = 0; // used for calculating centroid x position 
+        int yTotal = 0; // used for calulating centroid y position
+        int size = 0; // used as amount to determine centroid
+        
+        while(!imageQueue.isEmpty()){
+            int[] current = imageQueue.poll();
+            int curX = current[0];
+            int curY = current[1];
+
+            if(visited[curY][curX]) continue;
+            visited[curY][curX] = true;
+
+            xTotal += curX;
+            yTotal += curY;
+            size++;
+
+            for(int[] move: possibleMoves(image, curX, curY)) {
+                if(!visited[move[1]][move[0]]) imageQueue.add(move);
+            }
+        }
+
+        return new Group(size, new Coordinate(xTotal / size, yTotal / size));
+    }
+
+    private static List<int[]> possibleMoves(int[][] image, int x, int y) {
+        List<int[]> possibleMoves = new ArrayList<>();
+        int[][] moves = new int[][]{ 
+            {-1, 0}, 
+            {1, 0}, 
+            {0, -1}, 
+            {0, 1} 
+        };
+
+        for(int[] move : moves){
+            int newX = x + move[0];
+            int newY = y + move[1];
+
+            if(newY >= 0 && newY < image.length &&
+               newX >= 0 && newX < image[0].length &&
+               image[newY][newX] == 1){
+                    possibleMoves.add(new int[]{newX, newY});
+               }
+        }
+
+        return possibleMoves;
+    }
 }

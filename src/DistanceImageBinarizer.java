@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 /**
@@ -15,6 +16,9 @@ public class DistanceImageBinarizer implements ImageBinarizer {
     private final ColorDistanceFinder distanceFinder;
     private final int threshold;
     private final int targetColor;
+    private final Color white = new Color(255, 255, 255);
+    private final Color black = new Color(0, 0, 0);
+    
 
     /**
      * Constructs a DistanceImageBinarizer using the given ColorDistanceFinder,
@@ -45,7 +49,25 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      */
     @Override
     public int[][] toBinaryArray(BufferedImage image) {
-        return null;
+        int imageHeight = image.getHeight();
+        int imageWidth = image.getWidth();
+        int xCoord = image.getMinTileX();
+        int yCoord = image.getMinTileY();
+        int[][] returnArray = new int[imageHeight][imageWidth];
+
+        for(int yCheck = yCoord; yCheck < imageHeight; yCheck++){
+            for(int xCheck = xCoord; xCheck < imageWidth; xCheck++){
+                int getRGBColor = image.getRGB(xCheck, yCheck);
+                Color colorConvert = new Color(getRGBColor, false);
+                if(distanceFinder.distance(colorConvert.getRGB(), targetColor) >= threshold){
+                    returnArray[yCheck][xCheck] = 1;
+                }else{
+                    returnArray[yCheck][xCheck] = 0;
+                }
+
+            }
+        }
+        return returnArray;
     }
 
     /**
@@ -58,6 +80,16 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      */
     @Override
     public BufferedImage toBufferedImage(int[][] image) {
-        return null;
+        BufferedImage returnImage = new BufferedImage(image[0].length, image.length, BufferedImage.TYPE_INT_RGB);
+        for(int row = 0; row < image.length ; row++){
+            for(int column = 0; column < image[0].length; column++){
+                if(image[row][column] == 1){
+                    returnImage.setRGB(column, row, black.getRGB());
+                }else{
+                    returnImage.setRGB(column, row, white.getRGB());
+                }
+            }
+        }
+        return returnImage;
     }
 }
