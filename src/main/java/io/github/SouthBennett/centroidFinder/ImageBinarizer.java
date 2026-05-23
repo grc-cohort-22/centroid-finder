@@ -1,3 +1,4 @@
+package io.github.SouthBennett.centroidFinder;
 import java.awt.image.BufferedImage;
 
 /**

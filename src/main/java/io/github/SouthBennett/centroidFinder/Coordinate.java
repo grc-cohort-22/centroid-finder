@@ -1,3 +1,4 @@
+package io.github.SouthBennett.centroidFinder;
 /**
  * Represents a location in an image or array
  * 
