@@ -1,3 +1,5 @@
+package io.github.F00dDemon.centroidfinder;
+
 import java.awt.image.BufferedImage;
 import java.util.List;
 
@@ -37,6 +39,8 @@ public class BinarizingImageGroupFinder implements ImageGroupFinder {
      */
     @Override
     public List<Group> findConnectedGroups(BufferedImage image) {
-        return null;
+        int[][] array = binarizer.toBinaryArray(image);
+
+        return groupFinder.findConnectedGroups(array);
     }
 }

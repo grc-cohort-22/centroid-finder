@@ -1,3 +1,5 @@
+package io.github.F00dDemon.centroidfinder;
+
 /**
  * Defines an interface for computing the distance between two colors.
  * 

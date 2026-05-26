@@ -1,3 +1,5 @@
+package io.github.F00dDemon.centroidfinder;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.PrintWriter;
@@ -62,6 +64,8 @@ public class ImageSummaryApp {
             System.err.println("Invalid hex target color. Please provide a color in RRGGBB format.");
             return;
         }
+        
+        // Above sets up variables established above, safe to ignore... Probably
         
         // Create the DistanceImageBinarizer with a EuclideanColorDistance instance.
         ColorDistanceFinder distanceFinder = new EuclideanColorDistance();

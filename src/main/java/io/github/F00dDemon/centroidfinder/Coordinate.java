@@ -1,3 +1,5 @@
+package io.github.F00dDemon.centroidfinder;
+
 /**
  * Represents a location in an image or array
  * 

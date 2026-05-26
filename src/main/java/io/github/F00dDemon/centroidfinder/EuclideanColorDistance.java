@@ -1,3 +1,5 @@
+package io.github.F00dDemon.centroidfinder;
+
 public class EuclideanColorDistance implements ColorDistanceFinder {
     /**
      * Returns the euclidean color distance between two hex RGB colors.
@@ -19,6 +21,18 @@ public class EuclideanColorDistance implements ColorDistanceFinder {
      */
     @Override
     public double distance(int colorA, int colorB) {
-        return 0;
+        int rA = (colorA >> 16) & 0xFF;
+        int gA = (colorA >> 8) & 0xFF;
+        int bA = colorA & 0xFF;
+
+        int rB = (colorB >> 16) & 0xFF;
+        int gB = (colorB >> 8) & 0xFF;
+        int bB = colorB & 0xFF;
+
+        int red = rA - rB;
+        int green = gA - gB;
+        int blue = bA - bB;
+
+        return Math.sqrt((red * red) + (green * green) + (blue * blue));
     }
 }

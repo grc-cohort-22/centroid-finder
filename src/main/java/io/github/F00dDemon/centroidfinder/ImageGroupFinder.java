@@ -1,3 +1,5 @@
+package io.github.F00dDemon.centroidfinder;
+
 import java.util.List;
 import java.awt.image.BufferedImage;
 

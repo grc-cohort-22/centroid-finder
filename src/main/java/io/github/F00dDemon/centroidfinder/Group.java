@@ -1,3 +1,5 @@
+package io.github.F00dDemon.centroidfinder;
+
 /**
  * Represents a group of contiguous pixels in an image.
  * The top-left cell of the array (row:0, column:0) is considered to be coordinate (x:0, y:0).
@@ -37,6 +39,7 @@ public record Group(int size, Coordinate centroid) implements Comparable<Group> 
         }
         return Integer.compare(this.centroid().y(), other.centroid().y());
     }
+    
 
     /**
      * Returns a string representing this group in comma-separated values (CSV) format.
