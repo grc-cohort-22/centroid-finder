@@ -1,0 +1,11 @@
+BinarizingImageGroupFinderTest$FakeImageBinarizer.class
+CsvWriterTest.class
+LargestGroupSelectorTest.class
+EuclideanColorDistanceTest.class
+DistanceImageBinarizerTest.class
+BinarizingImageGroupFinderTest$CheckingBinaryGroupFinder.class
+DistanceImageBinarizerTest$FakeImageBinarizer.class
+DfsBinaryGroupFinderTest.class
+BinarizingImageGroupFinderTest$FakeBinaryGroupFinder.class
+BinarizingImageGroupFinderTest.class
+VideoProcessorOptionsTest.class

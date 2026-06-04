@@ -1,0 +1,17 @@
+DistanceImageBinarizer.class
+DfsBinaryGroupFinder.class
+LargestGroupSelector.class
+Coordinate.class
+EuclideanColorDistance.class
+CsvWriter.class
+ColorDistanceFinder.class
+VideoProcessorApp.class
+VideoExperiment.class
+VideoProcessorOptions.class
+BinarizingImageGroupFinder.class
+ImageGroupFinder.class
+ImageSummaryApp.class
+VideoProcessor.class
+BinaryGroupFinder.class
+ImageBinarizer.class
+Group.class
