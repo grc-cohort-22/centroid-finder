@@ -21,7 +21,8 @@ public class VideoProcessorTest {
                 inputVideo.getPath(),
                 actualCsv,
                 Integer.parseInt("FFFFFF", 16),
-                80
+                80,
+                1
         );
 
         assertTrue(actualCsv.exists());

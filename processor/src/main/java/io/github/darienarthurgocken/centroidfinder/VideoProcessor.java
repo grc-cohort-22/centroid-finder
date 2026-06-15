@@ -19,20 +19,19 @@ import org.bytedeco.ffmpeg.global.avutil;
  * seconds,x,y
  */
 public class VideoProcessor {
-
     /**
      * Runs the video processor from the command line.
      *
      * Expected arguments:
-     * input video path, output CSV path, target color in RRGGBB format, and
-     * threshold.
+     * input video path, output CSV path, target color in RRGGBB format,
+     * threshold, and frame interval.
      *
      * @param args command line arguments used to process the video
      */
     public static void main(String[] args) {
-        if (args.length < 4) {
+        if (args.length < 5) {
             System.err.println(
-                    "Usage: java -jar videoprocessor.jar inputPath outputCsv targetColor threshold");
+                    "Usage: java -jar videoprocessor.jar inputPath outputCsv targetColor threshold frameInterval");
             return;
         }
 
@@ -41,18 +40,25 @@ public class VideoProcessor {
 
         int targetColor;
         int threshold;
+        int frameInterval;
 
         try {
             targetColor = Integer.parseInt(args[2], 16);
             threshold = Integer.parseInt(args[3]);
+            frameInterval = Integer.parseInt(args[4]);
         } catch (NumberFormatException e) {
             System.err.println(
-                    "targetColor must be RRGGBB and threshold must be an integer.");
+                    "targetColor must be RRGGBB, threshold must be an integer, and frameInterval must be an integer.");
+            return;
+        }
+
+        if (frameInterval < 1 || frameInterval > 15) {
+            System.err.println("frameInterval must be between 1 and 15.");
             return;
         }
 
         try {
-            processVideo(inputPath, outputCsv, targetColor, threshold);
+            processVideo(inputPath, outputCsv, targetColor, threshold, frameInterval);
 
             System.out.println(
                     "Saved centroid tracking CSV to: "
@@ -66,21 +72,32 @@ public class VideoProcessor {
     /**
      * Processes a video and writes centroid tracking results to a CSV file.
      *
-     * Each frame is converted to a binary image based on the target color and
-     * threshold. The largest connected group is found, and its centroid is written
-     * to the CSV file. If no group is found, -1,-1 is written.
+     * Each selected frame is converted to a binary image based on the target color
+     * and threshold. The largest connected group is found, and its centroid is
+     * written to the CSV file. If no group is found, -1,-1 is written.
      *
-     * @param videoPath   path to the input video file
-     * @param outputCsv   file where the CSV results will be written
-     * @param targetColor RGB color to track, written as an integer
-     * @param threshold   maximum allowed color distance from the target color
+     * frameInterval controls how often frames are processed:
+     * 1 = every frame
+     * 5 = every 5th frame
+     * 10 = every 10th frame
+     *
+     * @param videoPath     path to the input video file
+     * @param outputCsv     file where the CSV results will be written
+     * @param targetColor   RGB color to track, written as an integer
+     * @param threshold     maximum allowed color distance from the target color
+     * @param frameInterval number of frames to skip between processing
      * @throws Exception if the video cannot be read or the CSV cannot be written
      */
     public static void processVideo(
             String videoPath,
             File outputCsv,
             int targetColor,
-            int threshold) throws Exception {
+            int threshold,
+            int frameInterval) throws Exception {
+
+        if (frameInterval < 1 || frameInterval > 15) {
+            throw new IllegalArgumentException("frameInterval must be between 1 and 15.");
+        }
 
         ColorDistanceFinder distanceFinder = new EuclideanColorDistance();
 
@@ -99,6 +116,8 @@ public class VideoProcessor {
 
             long startTime = System.nanoTime();
             System.out.println("Beginning to process video!");
+            System.out.println("Frame interval: " + frameInterval);
+
             FFmpegLogCallback.setLevel(avutil.AV_LOG_ERROR);
             grabber.start();
 
@@ -106,7 +125,7 @@ public class VideoProcessor {
             Frame frame;
 
             int frameCount = 0;
-            int frameInterval = 5;
+            int processedFrameCount = 0;
 
             while ((frame = grabber.grabImage()) != null) {
                 frameCount++;
@@ -114,7 +133,9 @@ public class VideoProcessor {
                 if (frameCount % frameInterval != 0) {
                     continue;
                 }
-                
+
+                processedFrameCount++;
+
                 BufferedImage image = Java2DFrameUtils.toBufferedImage(frame);
                 int seconds = formatTimestampSeconds(grabber);
 
@@ -123,7 +144,9 @@ public class VideoProcessor {
                         (grabber.getTimestamp() * 100) / videoLength);
 
                 System.out.println("PROGRESS:" + progress);
+
                 List<Group> groups = groupFinder.findConnectedGroups(image);
+
                 if (groups.isEmpty()) {
                     writer.println(seconds + ",-1,-1");
                 } else {
@@ -138,8 +161,13 @@ public class VideoProcessor {
             long endTime = System.nanoTime();
             long totalSeconds = (endTime - startTime) / 1_000_000_000L;
 
+            System.out.println("Total frames read: " + frameCount);
+            System.out.println("Frames processed: " + processedFrameCount);
+
             System.out.println(
-                    "Processing took " + (totalSeconds / 60) + " minutes and " + (totalSeconds % 60) + " seconds");
+                    "Processing took " + (totalSeconds / 60) + " minutes and "
+                            + (totalSeconds % 60) + " seconds");
+
             grabber.stop();
         }
     }

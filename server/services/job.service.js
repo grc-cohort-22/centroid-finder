@@ -86,7 +86,7 @@ export function createJobService({
         return restoreJobFromDisk(jobId);
     }
 
-    async function startProcess({ jobId, filename, targetColor, threshold }) {
+    async function startProcess({ jobId, filename, targetColor, threshold, frameInterval }) {
         const inputVideo = path.join(process.env.VIDEO_DIR, filename);
         const outputCsv = path.join(process.env.RESULT_DIR, `${jobId}.csv`);
         const metadataPath = path.join(process.env.RESULT_DIR, `${jobId}.meta.json`);
@@ -100,7 +100,8 @@ export function createJobService({
             outputCsv,
             createdAt: new Date().toISOString(),
             targetColor,
-            threshold
+            threshold, 
+            frameInterval
         }, null, 2), "utf8");
 
         const javaProcess = spawnImpl("java", [
@@ -109,7 +110,8 @@ export function createJobService({
             inputVideo,
             outputCsv,
             targetColor,
-            threshold
+            threshold, 
+            frameInterval
         ]);
 
         javaProcess.stdout.on("data", (data) => {
@@ -153,11 +155,11 @@ export function createJobService({
         }
     }
 
-    async function startJob({ filename, targetColor, threshold }) {
+    async function startJob({ filename, targetColor, threshold, frameInterval = 5 }) {
         const jobId = v4();
 
         createJob(jobId, filename);
-        queueStore.push({ jobId, filename, targetColor, threshold });
+        queueStore.push({ jobId, filename, targetColor, threshold, frameInterval });
 
         drainQueue();
 

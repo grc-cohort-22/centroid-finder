@@ -3,7 +3,7 @@ import { startJob, getJob } from "../services/job.service.js";
 export async function startProcessingJob(req, res) {
     try {
         const { filename } = req.params;
-        const { targetColor, threshold } = req.query;
+        const { targetColor, threshold, frameInterval } = req.query;
 
         if (!targetColor || !threshold) {
             return res.status(400).json({
@@ -11,10 +11,23 @@ export async function startProcessingJob(req, res) {
             });
         }
 
+        const parsedFrameInterval = Number(frameInterval || 5);
+
+        if (
+            Number.isNaN(parsedFrameInterval) ||
+            parsedFrameInterval < 1 ||
+            parsedFrameInterval > 15
+        ) {
+            return res.status(400).json({
+                error: "frameInterval must be between 1 and 15."
+            });
+        }
+
         const jobId = await startJob({
             filename,
             targetColor,
-            threshold
+            threshold,
+            frameInterval: parsedFrameInterval
         });
 
         return res.status(202).json({
