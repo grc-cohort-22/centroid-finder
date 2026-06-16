@@ -1,0 +1,43 @@
+package io.github.darienarthurgocken.centroidfinder;
+
+public class EuclideanColorDistance implements ColorDistanceFinder {
+    /**
+     * Returns the euclidean color distance between two hex RGB colors.
+     * 
+     * Each color is represented as a 24-bit integer in the form 0xRRGGBB, where
+     * RR is the red component, GG is the green component, and BB is the blue component,
+     * each ranging from 0 to 255.
+     * 
+     * The Euclidean color distance is calculated by treating each color as a point
+     * in 3D space (red, green, blue) and applying the Euclidean distance formula:
+     * 
+     * sqrt((r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2)
+     * 
+     * This gives a measure of how visually different the two colors are.
+     * 
+     * @param colorA the first color as a 24-bit hex RGB integer
+     * @param colorB the second color as a 24-bit hex RGB integer
+     * @return the Euclidean distance between the two colors
+     */
+    @Override
+    public double distance(int colorA, int colorB) {
+        int[] colorA_RGB = convertHexToRGB(colorA);
+        int[] colorB_RGB = convertHexToRGB(colorB);
+
+        int red = colorA_RGB[0] - colorB_RGB[0];
+        int green = colorA_RGB[1] - colorB_RGB[1];
+        int blue = colorA_RGB[2] - colorB_RGB[2];
+
+        double distance = Math.sqrt(red * red + green * green + blue * blue);
+
+        return distance;
+    }
+
+    private int[] convertHexToRGB(int color) {
+        int red = (color >> 16) & 0xFF;
+        int green = (color >> 8) & 0xFF;
+        int blue = (color) & 0xFF;
+
+        return new int[]{red, green, blue};
+    }
+}

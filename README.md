@@ -1,66 +1,88 @@
-# centroid-finder
+# Salamander Tracker 
 
-## *DO THIS FIRST* Wave 0: AI Rules 
-AI is *NOT ALLOWED* for generating implementations of the classes.
-AI is allowed for helping you make test cases.
+## Created by: 
+Darien Arthur-Gocken & Lilian Nguyen
 
-Don't have it just create the tests mindlessly for you though! Make sure you're actively involved in making the tests.
+## Project Overview:
+Salamander Tracker is a full-stack web application that allows users to analyze salamander videos by selecting a target color, tolerance threshold, and frame interval. The application generates a binary image preview showing detected regions and exports centroid tracking data as a CSV file for further analysis. 
 
-DO NOT MIX HUMAN AND AI COMMITS.
-EVERY COMMIT THAT USES AI MUST START WITH THE COMMIT MESSAGE "AI Used" AND IT MUST ONLY CREATE/ALTER TEST FILES
+Users can: 
+- Browse available salamander videos
+- Preview a video frame before processing
+- Select a target color using a color picker
+- Adjust the color tolerance threshold
+- Adjust the frame interval used during processing
+- View a binary image representation of the detected regions
+- Display the centroid of the largest detected region
+- Export tracking results as a CSV file
+- View the most recently genereated CSV results using the latest button
 
-For this wave, please have each partner make a commit below with their username acknowledging that they understand the rules, according to the following format:
+## Demonstration 
+![Salamander Tracker Demo](salamander.gif)
 
-"I, YOUR_GITHUB_USERNAME, understand that AI is ONLY to be used for tests, and that every commit that I use AI for must start with 'AI Used'"
+## Prerequisites: 
+- Java 21
+- Maven
+- Node.js
+- npm
 
-## Wave 1: Understand
-Read through ImageSummaryApp in detail with your partner. Understand what each part does. This will involve looking through and reading ALL of the other classes records and interfaces. This will take a long time, but it is worth it! Do not skimp on this part, you will regret it! Also look at the sampleInput and sampleOutput folders to understand what comes in and what goes out.
+## Environment Variables
+Create a `.env` file by copying the `.env.example` file & modify any values that needs to be changed.
 
-As you read through the files, take notes in notes.md to help you and your partner understand. Make frequent commits to your notes.
+## Processor Setup (Java Backend)
+The processor is responsible for analyzing video frames and generating centroid tracking CSV files.
 
-## Wave 2: Implement DfsBinaryGroupFinder
-This class takes in a binary image array and finds the connected groups. It will look very similar in many ways to the explorer problem you did for DFS! You'll need to understand the Group record to do this well.
+### Build the Processor
+- Navigate to the processor directory: `cd processor`
+- Build the processor JAR: `mvn clean package -DskipTests`
+    - The videoProcessing Test uses a local sample video that is not included in the repository. So, tests may fail in a clean clone unless the sample video is added manually.
+- It will then generate the jar file
 
-Consider STARTING with the unit tests. Remember, you can use AI to help with the unit tests but NOT the implementation. Any AI commit must start with the message "AI Used"
+### Server Setup
+- Navigate to the server directory: `cd server`
+- Install dependencies: `npm install`
+- Start the backend server: `npm run dev`
+- The back will be available at: `http://localhost:3000`
 
-MAKE SURE YOU MAKE THOROUGH UNIT TESTS.
+## Frontend Setup
+- Install dependencies: `npm install`
+- Start the development server: `npm run dev`
+- The frontend will be available at: `http://localhost:5173`
 
-## Wave 3: Implement EuclideanColorDistance
-Implement EuclideanColorDistance. You may consider adding a helper method for converting a hex int into R, G, and B components.
+## Color Palette
+- Text #2B4064
+- Background #748496
+- Primary #77B248
+- Secondary #DEDCFF
+- Accent #B27729
 
-Again, consider starting with unit tests. You may consider using WolframAlpha to help you get correct expected values.
+## Custom Feature
+### Latest Results Button
+The latest button on the videos page allow users to quickly access the most recently generated CSV file. 
 
-MAKE SURE YOU MAKE THOROUGH UNIT TESTS.
+How to Use:
+1. Navigate to the videos page.
+2. Locate the desired video in the list.
+3. Click the latest button.
+4. The application will display the most recently generated centroid tracking results for that video. 
 
-## Wave 4: Implement DistanceImageBinarizer
-To do this you will need to research `java.awt.image.BufferedImage`. In particular, make sure to understand `getRGB` and `setRGB`. When creating a new image, you can use the below to start the instance:
+### Adjustable Frame Interval 
+Users can choose how frequently video frames are processed during centroid tracking. 
 
-```
-new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-```
+Lower values process more frames and provide more detailed tracking data. While higher values process fewer frames and complete processing quicker. 
 
-Note that a lot of this class will be calling methods in BinaryGroupFinder and ColorDistanceFinder!
+How to Use:
+1. Navigate to the Preview page for a video.
+2. Select a target color and threshold.
+3. Enter a frame interval value between 1 and 15.
+4. Click Export.
+5. The processor will analyze every nth frame based on the selected interval.
 
-MAKE SURE YOU MAKE THOROUGH UNIT TESTS. Consider asking the AI to teach you about mocks and fakes in unit testing and how they may be helpful here.
+Examples:
+- 1 = Process every frame (most accurate)
+- 5 = Process every 5th frame
+- 15 = Process every 15th frame (fastest)
 
-HINT: `getRGB` returns a 32-bit AARRGGBB color (includes alpha channel). However, ColorDistanceFinder expects the colors to come in RRGGBB format (no alpha channel (most significant 8 bits set to 0)). What can you do to make this conversion happen?
-
-## Wave 5: Implement BinarizingImageGroupFinder
-This implementation will be relatively short! It will mostly be calling methods in ImageBinarizer and BinaryGroupFinder.
-
-MAKE SURE YOU MAKE THOROUGH UNIT TESTS. Consider asking the AI to teach you about mocks and fakes in unit testing and how they may be helpful here. I recommend NOT using any external library other than JUnit. If the AI wants to use another external library, consider asking it not to and to make stubs instead.
-
-## Wave 6: Validation
-To validate your code is working, make sure you're in the centroid-finder directory and run the below command:
-
-```
-javac -cp lib/junit-platform-console-standalone-6.0.3.jar src/*.java && java -cp src ImageSummaryApp sampleInput/squares.jpg FFA200 164
-```
-
-This will compile your files and run the main method in ImageSummaryApp against the sample image with a target color of orange and a threshold of 164. It should binarized.png and groups.csv which should match the corresponding files in the sampleOutput directory.
-
-Once you have confirmed it is working, clean up your code, make sure it's committed and pushed, and make a PR to submit. Great job!
-
-## Optional Wave 7: Enhancements?
-If you want to, you can make a new branch to start experimenting. See if you can come up with a better color distance method (hint: look up perceptual color spaces). See if you can make your code more efficient or mor suited to spotting salamanders! Experiment with other test files. PLEASE MAKE SURE THIS IS IN A SEPARATE BRANCH FROM YOUR SUBMISSION.
-
+### Links to Repository:
+- Frontend: https://github.com/DarienArthur-Gocken/salamander
+- Backend: https://github.com/DarienArthur-Gocken/centroid-finder
