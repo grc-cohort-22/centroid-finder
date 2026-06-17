@@ -1,0 +1,22 @@
+- The map of csv file that can have different color
+- Display the csv file
+- adding downloading csv file functionality
+- Adjusting the speed odf the salamander
+- Tracking more than one object
+- Tracking the spped of multiple object
+- Display the object movment on graph 
+- Tacking the food Nutritions
+- Tracking the carbs level on food we eat
+- Time managment App
+-  Todolist App 
+- Transulator app into different languages
+- Tracing object steps with specific color
+- progress tracing
+- Mark as showed video
+- Handling more than one video with different csv file name
+- Tracing deliver packages
+- Tracking sreen time
+- Tracking which app you visited the most
+- Tracking the growth of plant
+- Shotest way to reach your destination
+

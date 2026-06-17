@@ -1,0 +1,17 @@
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/BinarizingImageGroupFinder.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/BinaryGroupFinder.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/ColorDistanceFinder.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/Coordinate.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/CsvWriter.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/DfsBinaryGroupFinder.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/DistanceImageBinarizer.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/EuclideanColorDistance.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/Group.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/ImageBinarizer.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/ImageGroupFinder.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/ImageSummaryApp.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/LargestGroupSelector.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/VideoExperiment.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/VideoProcessor.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/VideoProcessorApp.java
+/Users/ebtisamjelani/sdev334/centroid-finder/src/main/java/VideoProcessorOptions.java
