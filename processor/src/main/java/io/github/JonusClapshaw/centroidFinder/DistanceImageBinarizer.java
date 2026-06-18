@@ -1,3 +1,5 @@
+package io.github.JonusClapshaw.centroidFinder;
+
 import java.awt.image.BufferedImage;
 
 /**
@@ -44,8 +46,26 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      * @return a 2D binary array where 1 represents white and 0 represents black
      */
     @Override
-    public int[][] toBinaryArray(BufferedImage image) {
-        return null;
+    public int[][] toBinaryArray(BufferedImage image) {      
+        int[][] newImage = new int[image.getHeight()][image.getWidth()];
+
+        int pWidth = image.getWidth();
+        int pHeight = image.getHeight();
+
+        for(int height = 0; height < pHeight; height++){
+            for(int width = 0; width < pWidth; width++){
+                int color = image.getRGB(width, height);
+                color = color & 0x00FFFFFF;
+                
+                if(distanceFinder.distance(color, targetColor) < threshold){
+                    newImage[height][width] = 1;
+                } else {
+                    newImage[height][width] = 0;
+                }
+            }
+        }
+        
+        return newImage;
     }
 
     /**
@@ -58,6 +78,43 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      */
     @Override
     public BufferedImage toBufferedImage(int[][] image) {
-        return null;
+        if (image == null) {
+            throw new NullPointerException();
+        }
+        if (image.length == 0) {
+            throw new IllegalArgumentException();
+        }
+        if (image[0] == null) {
+            throw new NullPointerException();
+        }
+
+        int pHeight = image.length;
+        int pWidth = image[0].length;
+        if (pWidth == 0) {
+            throw new IllegalArgumentException();
+        }
+        for (int[] row : image) {
+            if (row == null) {
+                throw new NullPointerException();
+            }
+            if (row.length != pWidth) {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        BufferedImage output = new BufferedImage(pWidth, pHeight, BufferedImage.TYPE_INT_RGB);
+
+        for(int height = 0; height < pHeight; height++){
+            for(int width = 0; width < pWidth; width++){
+                if(image[height][width] == 1){
+                    output.setRGB(width, height, 0xFFFFFF);
+                }
+                else {
+                    output.setRGB(width, height, 0x000000);
+                }
+            }
+        }
+
+        return output;
     }
 }

@@ -1,3 +1,5 @@
+package io.github.JonusClapshaw.centroidFinder;
+
 import java.util.List;
 import java.awt.image.BufferedImage;
 
