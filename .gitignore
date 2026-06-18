@@ -1,3 +1,14 @@
+# ignore video and csv
+processor/sampleInput
+processor/sampleOutput
+
+server/node_modules
+server/statuses/*.json
+.env
+
+# Maven build output
+target/
+
 # Compiled class file
 *.class
 
