@@ -1,66 +1,52 @@
-# centroid-finder
+# Centroid Finder
 
-## *DO THIS FIRST* Wave 0: AI Rules 
-AI is *NOT ALLOWED* for generating implementations of the classes.
-AI is allowed for helping you make test cases.
+## What is it?
+centroid-finder is a project developed by jmakho01 and f00dDemon that focuses on tracking groups of color within a given image or video. It works by awaiting a user input of an image/video, a target color and a numerical threshold that determines whether a pixel within an input is eligible to be tracked. The data is then logged into a CSV which gives the coordinate of the largest collective found within a single frame.
 
-Don't have it just create the tests mindlessly for you though! Make sure you're actively involved in making the tests.
+## How can it be used?
+centroid-finder is primarily developed in Java and has a .jar file that allows it to run with inputs determined by the user.
 
-DO NOT MIX HUMAN AND AI COMMITS.
-EVERY COMMIT THAT USES AI MUST START WITH THE COMMIT MESSAGE "AI Used" AND IT MUST ONLY CREATE/ALTER TEST FILES
+1. Clone the repository
+2. ```cd``` into the repository then into ```/processor```
+3. Run ```mvn package``` and let it run
+4. Under ```/target``` there should be a filed called ```centroidfinder-1.0-SNAPSHOT-jar-with-dependencies.jar```.
+5. Feel free to move this into a different directory along with a video to test on.
+6. Open a terminal in the path with the .jar and execute the file with this parameter structure:
+    ```
+    java -jar {PATH_TO_JAR_NAME.jar} {PATH_TO_VIDEO_INPUT.ext} {OUTPUT_DIRECTORY.csv} {COLOR_IN_HEX} {INTEGER_BETWEEN_0_200}
+    ```
+    Example:
+    ```
+    java -jar centroid.jar C:/Users/f00d/test/input.mp4 C:/Users/f00d/output.csv FF0000 128
+    ```
 
-For this wave, please have each partner make a commit below with their username acknowledging that they understand the rules, according to the following format:
+## Server Folder
 
-"I, YOUR_GITHUB_USERNAME, understand that AI is ONLY to be used for tests, and that every commit that I use AI for must start with 'AI Used'"
+The server folder is used as the backend portion of salamander-project, which can be viewed [here](https://github.com/jmakho01/salamander-project). To set up the backend, follow these steps:
 
-## Wave 1: Understand
-Read through ImageSummaryApp in detail with your partner. Understand what each part does. This will involve looking through and reading ALL of the other classes records and interfaces. This will take a long time, but it is worth it! Do not skimp on this part, you will regret it! Also look at the sampleInput and sampleOutput folders to understand what comes in and what goes out.
+1. Clone the repository and navitage to it (if you haven't yet).
+3. ```cd``` into the ```/server``` folder.
+4. Run ```npm i``` to install the necessary node packages for the project.
+5. Create a .env file with the following variables:
 
-As you read through the files, take notes in notes.md to help you and your partner understand. Make frequent commits to your notes.
+- ```VIDEOS_DIR``` - the directory where your videos are stored.
+- ```PROCESSOR_JAR``` - the filepath to where your centroidfinder jar file is located.
+- ```OUTPUT_DIR``` - the directory where the output csv files will be stored.
+- ```VITE_API_URL``` - the URL where Vite will pull the videos from.
+- ```PORT``` - the port number where the backend runs from.
 
-## Wave 2: Implement DfsBinaryGroupFinder
-This class takes in a binary image array and finds the connected groups. It will look very similar in many ways to the explorer problem you did for DFS! You'll need to understand the Group record to do this well.
+   Example:
+    ```
+    VIDEOS_DIR=../processor/res/testInput
+    PROCESSOR_JAR=../processor/target/centroidfinder-1.0-SNAPSHOT-jar-with-dependencies.jar
+    OUTPUT_DIR=../server/output
+    VITE_API_URL=http://localhost:3000/
+    PORT=3000
+    ```
 
-Consider STARTING with the unit tests. Remember, you can use AI to help with the unit tests but NOT the implementation. Any AI commit must start with the message "AI Used"
+7. Run ```npm run dev``` to run the server. Make sure that your frontend is running as well!
 
-MAKE SURE YOU MAKE THOROUGH UNIT TESTS.
+## Frontend Example
 
-## Wave 3: Implement EuclideanColorDistance
-Implement EuclideanColorDistance. You may consider adding a helper method for converting a hex int into R, G, and B components.
-
-Again, consider starting with unit tests. You may consider using WolframAlpha to help you get correct expected values.
-
-MAKE SURE YOU MAKE THOROUGH UNIT TESTS.
-
-## Wave 4: Implement DistanceImageBinarizer
-To do this you will need to research `java.awt.image.BufferedImage`. In particular, make sure to understand `getRGB` and `setRGB`. When creating a new image, you can use the below to start the instance:
-
-```
-new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-```
-
-Note that a lot of this class will be calling methods in BinaryGroupFinder and ColorDistanceFinder!
-
-MAKE SURE YOU MAKE THOROUGH UNIT TESTS. Consider asking the AI to teach you about mocks and fakes in unit testing and how they may be helpful here.
-
-HINT: `getRGB` returns a 32-bit AARRGGBB color (includes alpha channel). However, ColorDistanceFinder expects the colors to come in RRGGBB format (no alpha channel (most significant 8 bits set to 0)). What can you do to make this conversion happen?
-
-## Wave 5: Implement BinarizingImageGroupFinder
-This implementation will be relatively short! It will mostly be calling methods in ImageBinarizer and BinaryGroupFinder.
-
-MAKE SURE YOU MAKE THOROUGH UNIT TESTS. Consider asking the AI to teach you about mocks and fakes in unit testing and how they may be helpful here. I recommend NOT using any external library other than JUnit. If the AI wants to use another external library, consider asking it not to and to make stubs instead.
-
-## Wave 6: Validation
-To validate your code is working, make sure you're in the centroid-finder directory and run the below command:
-
-```
-javac -cp lib/junit-platform-console-standalone-6.0.3.jar src/*.java && java -cp src ImageSummaryApp sampleInput/squares.jpg FFA200 164
-```
-
-This will compile your files and run the main method in ImageSummaryApp against the sample image with a target color of orange and a threshold of 164. It should binarized.png and groups.csv which should match the corresponding files in the sampleOutput directory.
-
-Once you have confirmed it is working, clean up your code, make sure it's committed and pushed, and make a PR to submit. Great job!
-
-## Optional Wave 7: Enhancements?
-If you want to, you can make a new branch to start experimenting. See if you can come up with a better color distance method (hint: look up perceptual color spaces). See if you can make your code more efficient or mor suited to spotting salamanders! Experiment with other test files. PLEASE MAKE SURE THIS IS IN A SEPARATE BRANCH FROM YOUR SUBMISSION.
+<img width="1545" height="1226" alt="Frontend Preview page" src="https://github.com/user-attachments/assets/3e46a65d-fb09-4ae3-964b-4158b145fa96" />
 
