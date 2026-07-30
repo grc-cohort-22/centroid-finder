@@ -37,6 +37,10 @@ public class BinarizingImageGroupFinder implements ImageGroupFinder {
      */
     @Override
     public List<Group> findConnectedGroups(BufferedImage image) {
-        return null;
+        // Convert the input buffered image to a binary image array
+        int[][] binaryImage = binarizer.toBinaryArray(image);
+
+        // DfsBinaryGroupFinder already returns groups in descending order per its contract
+        return groupFinder.findConnectedGroups(binaryImage);
     }
 }
