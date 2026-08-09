@@ -15,8 +15,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Reusable job graph (.github/workflows/_ci.yml) — unit + integration tests.
+  # deploy-backend below waits on this one job name regardless of how many
+  # checks it grows to contain, so a red test can never reach prod.
+  ci:
+    uses: ./.github/workflows/_ci.yml
+
   deploy-backend:
     name: Deploy Backend
+    needs: ci
     runs-on: ubuntu-latest
     environment: prod
 
@@ -31,6 +38,8 @@ jobs:
           java-version: '17'
           cache: maven
 
+      # -DskipTests is safe here: the `ci` job above already ran the full
+      # unit + integration suite against this same commit.
       - name: Build JARs
         run: mvn -B package -DskipTests
 
