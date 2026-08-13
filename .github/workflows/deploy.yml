@@ -1,9 +1,20 @@
 name: Deploy
 
+# Manual trigger only. The AWS environment this deploys into (ECS cluster,
+# service, ECR repository, RDS instance) has been torn down — the project is
+# not kept running continuously, since an idle Fargate service plus RDS costs
+# real money for a portfolio demo. Nothing here is stale or broken: the
+# pipeline below is exactly what ran on every push while the environment
+# existed, last succeeding 2026-06-18.
+#
+# To deploy again: `terraform apply` in terraform/environments/prod, set the
+# ECS_CLUSTER / ECS_SERVICE / ECS_TASK_FAMILY / ECR_REPOSITORY repo variables
+# from its outputs, then run this workflow from the Actions tab.
+#
+# Left on `push: main` it would fail on every commit — the ECR push step has
+# no repository to push to — leaving a permanent red mark on the default
+# branch for an entirely expected reason. See docs/IMPROVEMENT_SPEC.md.
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
