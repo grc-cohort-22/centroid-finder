@@ -425,6 +425,6 @@ Set the secrets and variables listed in [Configuration Matrix](#configuration-ma
 |----------|---------|
 | [`aws-deployment-spec.md`](aws-deployment-spec.md) | Full architecture and configuration spec |
 | [`terraform/README.md`](../terraform/README.md) | Terraform bootstrap and apply commands |
-| [`goals.md`](goals.md) | Project tier definitions |
+| the project goals | Project tier definitions |
 | [`.github/workflows/run-tests.yml`](../.github/workflows/run-tests.yml) | CI unit + integration tests |
 | [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | Backend deploy workflow |

@@ -1,10 +1,10 @@
-# AWS Deployment Specification (Goal Tier)
+# AWS Deployment Specification
 
-This document is the implementation-ready spec for deploying centroid-finder to a **single AWS environment** (`prod`). It supersedes the manual EC2/JAR flow in [`deploymentPlan.md`](../deploymentPlan.md) for Goal-tier work described in [`goals.md`](goals.md) (lines 33–38).
+This document is the implementation-ready spec for deploying centroid-finder to a **single AWS environment** (`prod`). It supersedes the earlier manual EC2/JAR deployment flow.
 
 **Compute choice:** **Amazon ECS on Fargate** behind an Application Load Balancer. Your instructor’s ECS suggestion fits naturally here: the deploy unit is already a Docker image in ECR, and ECS replaces hand-rolled ASG user-data + `docker run` with a managed rolling deployment.
 
-> **Goals.md mapping:** The original Goal bullet says “Auto Scaling Group behind an ALB.” With ECS Fargate, scaling is done via **ECS Service Auto Scaling** (task count), not an EC2 ASG. That satisfies the same intent (scale out under load, ALB in front). If your course requires a literal EC2 ASG, see [Appendix A: ECS on EC2](#appendix-a-ecs-on-ec2-alternative).
+> **On autoscaling:** the original design called for an Auto Scaling Group behind an ALB. With ECS Fargate, scaling is handled by **ECS Service Auto Scaling** (task count) rather than an EC2 ASG — same intent (scale out under load, ALB in front), fewer moving parts. For the literal EC2 ASG variant, see [Appendix A: ECS on EC2](#appendix-a-ecs-on-ec2-alternative).
 
 ---
 
@@ -76,15 +76,15 @@ flowchart TB
 
 The app reads/writes videos and CSV results on the local filesystem (`VIDEOS_DIR`, `RESULTS_DIR`). With more than one ECS task behind the ALB, **EFS must be mounted into every task** so any task can read a video and serve a result file written by another task. Job metadata already lives in RDS.
 
-S3-backed storage is a Stretch goal (requires application code changes).
+S3-backed storage is deliberately out of scope here (it requires application code changes).
 
 ---
 
 ## 2. Scope
 
-### In scope (Goal tier)
+### In scope
 
-| Goal (from `goals.md`) | Implementation |
+| Requirement | Implementation |
 |------------------------|----------------|
 | Scale behind an ALB | ALB → ECS Fargate service (1–3 tasks) |
 | Managed RDS for job metadata | PostgreSQL 16 in private subnets |
@@ -92,7 +92,7 @@ S3-backed storage is a Stretch goal (requires application code changes).
 | Env vars and secrets via GitHub + AWS | GitHub OIDC, Variables, Secrets; AWS Secrets Manager + task definition |
 | Core infrastructure in Terraform | `terraform/environments/prod/` |
 
-### Out of scope (Stretch / Impossible tiers)
+### Out of scope
 
 - dev/stage/prod multi-environment
 - Blue/green CodeDeploy or ECS CodeDeploy controller
@@ -167,7 +167,7 @@ Normalize database name to **`centroid_finder`** (matches `application.yml` defa
 
 ### 3.4 Other fixes
 
-- **JavaCV migration** ([`goals.md`](goals.md) Easy tier) — blocking for container integration test that decodes `sampleInput/test_short.mp4`.
+- **JavaCV migration** — blocking for the container integration test that decodes `sampleInput/test_short.mp4`.
 - **CLI invocation** — verify [`DefaultJobProcessLauncher`](../src/main/java/io/github/konradkelly/centroidfinder/DefaultJobProcessLauncher.java) args match `CliArgumentParser` before relying on async jobs in prod.
 
 ---
@@ -364,7 +364,7 @@ Image tags: **`{git-sha}`** (immutable). `:latest` optional for local dev only.
 
 ## 10. Frontend (Terraform module: `frontend`)
 
-Same pattern as [`deploymentPlan.md`](../deploymentPlan.md), with the API origin pointing at the **ALB** (not EC2).
+Same pattern as the earlier manual plan, with the API origin pointing at the **ALB** (not EC2).
 
 | Resource | Config |
 |----------|--------|
@@ -554,7 +554,7 @@ Use this if the course rubric requires a literal **EC2 Auto Scaling Group**:
 - ALB target type can be **`instance`** (bridge/host mode) or **`ip`** (awsvpc on EC2).
 - Deploy still via `register-task-definition` + `update-service`; ASG scales **EC2 capacity**, ECS scales **task count** on that capacity.
 
-This is more moving parts than Fargate but maps directly to “ASG behind ALB” wording in `goals.md`.
+This is more moving parts than Fargate, but is the literal “ASG behind ALB” topology if that is what you need.
 
 ---
 
@@ -562,7 +562,5 @@ This is more moving parts than Fargate but maps directly to “ASG behind ALB”
 
 | Document | Purpose |
 |----------|---------|
-| [`goals.md`](goals.md) | Project tier definitions |
-| [`deploymentPlan.md`](../deploymentPlan.md) | Original Easy-tier manual plan (EC2 + JAR) |
 | [`application.yml`](../src/main/resources/application.yml) | Runtime config defaults |
 | [`.github/workflows/run-tests.yml`](../.github/workflows/run-tests.yml) | CI pipeline |
