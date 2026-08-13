@@ -1,3 +1,13 @@
+# Production overrides. Every value here is deliberately without a default:
+# a missing environment variable should stop the service starting rather than
+# fall back to something guessable.
+app:
+  security:
+    username: ${APP_SECURITY_USERNAME}
+    # BCrypt hash, not a plaintext password. Generate one with Spring's own
+    # encoder, or any bcrypt tool, and store the resulting $2b$... string.
+    password-hash: ${APP_SECURITY_PASSWORD_HASH}
+
 spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL}

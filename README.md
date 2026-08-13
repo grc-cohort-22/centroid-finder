@@ -92,6 +92,29 @@ disappearing.
 | `GET` | `/videos/{filename}` | Fetch the source video |
 | `GET` | `/results/{filename}` | Download the result CSV |
 
+Only `POST /process/**` requires authentication. Everything else is public: the
+browser frontend reads those endpoints on page load and cannot hold a credential
+without publishing it, and the data is animal coordinates. Submission is the one
+call that costs something — it launches a JVM per job — so that is what is
+guarded, with HTTP Basic plus a per-caller rate limit.
+
+```bash
+curl -u dev:dev -X POST 'http://localhost:8080/process/clip.mp4?targetColor=FF0000&threshold=100'
+```
+
+Local credentials are `dev` / `dev`. They are not a secret — `application.yml`
+carries a BCrypt hash of them so the repo can be cloned and run. The `prod`
+profile overrides both with `APP_SECURITY_USERNAME` and
+`APP_SECURITY_PASSWORD_HASH` (a BCrypt hash, not a plaintext password) and has no
+defaults, so a production start fails fast rather than falling back to something
+guessable.
+
+Rate limiting is deliberately separate from authentication: a valid credential
+can still queue a hundred jobs, and each one decodes video in its own JVM. The
+limiter is a fixed window held in memory — enough for a single-task deployment,
+and it would need replacing with something shared before running more than one
+replica.
+
 ```json
 // while running
 { "status": "processing" }
@@ -166,6 +189,10 @@ Arguments are `inputPath outputCsv targetColor(hex) threshold(0-442)`.
 | `VIDEOS_DIR` | `./videos` | Where source videos are read from |
 | `RESULTS_DIR` | `./results` | Where result CSVs are written |
 | `JOB_TIMEOUT` | `10m` | Wall-clock limit before a job subprocess is destroyed |
+| `APP_SECURITY_USERNAME` | `dev` | Username for `POST /process/**` |
+| `APP_SECURITY_PASSWORD_HASH` | BCrypt of `dev` | BCrypt hash. Required with no default under the `prod` profile. |
+| `APP_RATE_LIMIT_MAX_SUBMISSIONS` | `10` | Job submissions allowed per window, per caller |
+| `APP_RATE_LIMIT_WINDOW` | `1m` | Length of that window |
 | `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5432/centroid_finder` | |
 | `SPRING_DATASOURCE_USERNAME` | `postgres` | |
 | `SPRING_DATASOURCE_PASSWORD` | `postgres` | |
@@ -174,7 +201,7 @@ Arguments are `inputPath outputCsv targetColor(hex) threshold(0-442)`.
 
 ## Tests
 
-163 JUnit 5 tests across 15 classes, split into two profiles.
+171 JUnit 5 tests across 17 classes, split into two profiles.
 
 ```bash
 mvn test

@@ -2,6 +2,16 @@ server:
   port: 8080
 
 app:
+  # Local-development credentials for POST /process/**. These are NOT a secret:
+  # the hash below is BCrypt of the password "dev", stated openly so the repo
+  # can be cloned and run. The prod profile overrides both with required
+  # environment variables and refuses to start without them.
+  security:
+    username: ${APP_SECURITY_USERNAME:dev}
+    password-hash: ${APP_SECURITY_PASSWORD_HASH:$2b$10$CUM1.9K58CuNfH1N8F.1HepM9B7/N8WPWwBWj9mT0YI3O7yX4R6nq}
+  rate-limit:
+    max-submissions: ${APP_RATE_LIMIT_MAX_SUBMISSIONS:10}
+    window: ${APP_RATE_LIMIT_WINDOW:1m}
   videos-dir: ${VIDEOS_DIR:./videos}
   results-dir: ${RESULTS_DIR:./results}
   video-processor-jar: ${VIDEO_PROCESSOR_JAR:./target/centroid-finder-1.0-SNAPSHOT-jar-with-dependencies.jar}
