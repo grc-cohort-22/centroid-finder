@@ -1,3 +1,9 @@
+# Copy to backend.tf and set the bucket from `terraform/bootstrap`'s outputs.
+#
+# The real backend.tf is gitignored. The bucket name is not a credential, but it
+# is account-specific and publishing it hands anyone reading the repo a target to
+# probe — and frontend-infra-template alongside this already follows the same
+# convention. The lock table name below is deterministic, so it needs no change.
 terraform {
   backend "s3" {
     bucket         = "centroid-finder-tf-state-CHANGE_ME"

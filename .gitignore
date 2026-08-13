@@ -44,3 +44,18 @@ mvn_output.txt
 *.tfstate.*
 terraform/**/terraform.tfvars
 !terraform/**/terraform.tfvars.example
+
+# Real backend config — bucket/table names come from terraform/bootstrap's
+# outputs and differ per account. Commit the .example, not the real one.
+terraform/**/backend.tf
+!terraform/**/backend.tf.example
+
+# Sample media. ensantina.mp4 is ~33MB; git is the wrong place for it, and a
+# stray `git add -A` would otherwise commit it permanently.
+videos/
+thumb.jpg
+results/
+
+# Local planning scratch — see docs/ for documentation that is meant to be read
+refactorPlan.md
+terraformPlan.md
