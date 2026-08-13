@@ -1,0 +1,34 @@
+# Local PostgreSQL for development and integration tests.
+#
+# Values here deliberately match the application's own defaults
+# (SPRING_DATASOURCE_URL / USERNAME / PASSWORD in README.md), so
+# `docker compose up -d` followed by `java -jar target/...jar` works with no
+# further configuration. The application itself is run from the host rather
+# than containerised here — it needs the built jar on disk anyway, and running
+# it directly keeps the edit/build/run loop short.
+services:
+  postgres:
+    image: postgres:16-alpine
+    # Deliberately no container_name: a fixed name collides with anything else
+    # already using it (including the container the old manual `docker run`
+    # instructions created) and stops two checkouts running side by side.
+    # Compose names it <project>-postgres-1, which is unique per directory.
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: centroid_finder
+    ports:
+      - "5432:5432"
+    volumes:
+      - centroid-postgres-data:/var/lib/postgresql/data
+      # Creates the separate database `mvn -P integration test` expects, so
+      # the integration profile works locally without extra setup.
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d centroid_finder"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  centroid-postgres-data:

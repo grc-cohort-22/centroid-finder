@@ -1,138 +1,103 @@
-﻿# Centroid Finder
+# Centroid Finder
 
-Centroid Finder is a Java project that analyzes images and videos to locate objects based on a given color. It finds the centroid (the average position of a group of matching pixels) for each detected object, and writes a timestamped location to a CSV. 
+**Tracks an object through a video by colour.** Give it a target colour and a
+distance threshold; it binarises every frame, finds connected regions of matching
+pixels, and writes the centroid of the largest one to a timestamped CSV — one row
+per second of footage.
 
-This was built as a part of a software development course. This application applies the DFS (Depth-First-Search) algorithm to identify targeted pixels.
+Java 17 · Spring Boot · JavaCV/FFmpeg · PostgreSQL · ECS Fargate via Terraform
+
+![Threshold sweep over an ensantina salamander](docs/ensantina-thresholds.gif)
+
+*The same frame at increasing distance thresholds. Too tight and the animal breaks
+into fragments; too loose and the background floods in. Finding the value that holds
+an object together without swallowing the scene is the actual problem.*
+
+---
+
+## How it works
+
+Three stages, each independently testable:
+
+**Binarise.** Every pixel is scored by Euclidean distance from the target colour in
+RGB space. Anything inside the threshold becomes white, everything else black. The
+threshold runs 0–442, because 442 is the distance between opposite corners of the
+RGB cube — the largest possible distance between two colours.
+
+**Find groups.** A depth-first search labels connected regions of white pixels. The
+search is **iterative**, using an explicit `ArrayDeque` rather than recursion — a
+large connected region in a high-resolution frame would otherwise be an easy way to
+overflow the stack.
+
+**Locate.** Each group's centroid is the mean position of its pixels. Groups are
+ordered by size, and the largest is written out as that frame's result. Frames with
+no match emit `-1,-1` rather than being skipped, so the CSV stays aligned to the
+video's timeline.
+
+![Web UI: original frame, binary mask with centroid overlay, and a completed job](docs/preview-ensantina.png)
+
+*The preview page: source frame, the binary mask the algorithm actually sees, the
+computed centroid as an orange dot, and the finished job offering its CSV.*
+
+---
 
 ## Architecture
 
-**Image Processing** - handles color distance calculations, binarizing images by color threshold, and writing centroid groups to CSV
+```
+POST /process/{filename}          →  job accepted, UUID returned immediately
+   │
+   ├─ Spring @Async thread pool (4 core / 8 max, queue 100)
+   │     │
+   │     └─ ProcessBuilder → separate JVM  ──►  video-processing CLI
+   │                                              (JavaCV/FFmpeg frame decode)
+   │
+   └─ JobStore (PostgreSQL)  ←  PROCESSING → DONE | ERROR
 
-**Video Processing** - uses JavaCV and FFmpeg to read frames; each frame gets binarized and analyzed, with centroid positions tracked and written out as a timestamped CSV
-
-**Server** - Spring Boot REST API for listing videos, generating thumbnails, submitting jobs, and polling status
-
-## Challenges
-
-The biggest challenge was finding a threshold value that consistently identified the object. The same applied to selecting a target color. One video we used was a recording of a salamander. Many times there would be gaps in its body, or pixels that were not part of the animal would be included in the detection. This showed us how sensitive image processing algorithms can be to various lighting conditions and color variation within a frame.
-
-![Ensantina threshold demo](docs/ensantina-thresholds.gif)
-
-![Ensantina web preview](docs/preview-ensantina.png)
-
-## Requirements
-
-- Java 17 or higher
-- Maven
-- JavaCV (FFmpeg bindings) for video frame extraction
-- JUnit 5
-- Docker
-- PostgreSQL
-
-## Prerequisites
-
-Choose a local runtime setup:
-
-### Option 1: Dockerized PostgreSQL + Spring Boot API
-
-```powershell
-# Clean and build app
-mvn clean package
-
-# create a shared network for the app and database
-docker network create centroid-net
-
-# PostgreSQL
-docker run -d --name centroid-postgres --network centroid-net -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=centroid_finder -p 5432:5432 postgres:16-alpine
-
-# Spring Boot API
-docker run -d --name centroid-springboot --network centroid-net -p 8080:8080 `
-  -e SPRING_DATASOURCE_URL=jdbc:postgresql://centroid-postgres:5432/centroid_finder `
-  -e SPRING_DATASOURCE_USERNAME=postgres `
-  -e SPRING_DATASOURCE_PASSWORD=postgres `
-  -e VIDEOS_DIR=/app/videos `
-  -e RESULTS_DIR=/app/results `
-  -v "${PWD}/target:/app/target" `
-  -v "${PWD}/videos:/app/videos" `
-  -v "${PWD}/results:/app/results" `
-  -w /app eclipse-temurin:25-jre java -jar /app/target/centroid-finder-1.0-SNAPSHOT.jar
+GET  /process/{jobId}/status      →  poll until DONE, then fetch the CSV
 ```
 
-To stop and remove the containers later:
+**Video work runs in its own JVM, not just its own thread.** Each job is launched
+with `ProcessBuilder` against the CLI jar. FFmpeg decoding happens in native code
+reached through JNI, where a malformed file can take down the whole JVM rather than
+raising a catchable exception. A crashed subprocess costs one job; the API stays up.
+It also makes the timeout enforceable — `JOB_TIMEOUT` is a real wall clock, and a
+process that overruns is destroyed rather than left to leak a thread.
 
-```powershell
-docker rm -f centroid-springboot centroid-postgres
+The tradeoff is honest: process startup costs a JVM launch per job, and stdout has to
+be drained on a separate thread or the subprocess blocks once its output buffer
+fills. For minutes-long video decodes, that overhead is noise against the isolation
+it buys.
+
+**The API never blocks on processing.** Submitting returns a UUID immediately; status
+lives in Postgres, so it survives a restart of the API. Statuses are `PROCESSING`,
+`DONE`, `ERROR` — an errored job carries its diagnostic message rather than
+disappearing.
+
+---
+
+## API
+
+| Method | Route | Description |
+|---|---|---|
+| `GET` | `/api/videos` | List filenames in `VIDEOS_DIR` |
+| `GET` | `/thumbnail/{filename}` | First frame as JPEG |
+| `POST` | `/process/{filename}?targetColor=FF0000&threshold=100` | Queue a job, returns `{ "jobId": "..." }` |
+| `GET` | `/process/{jobId}/status` | Current status and result location |
+| `GET` | `/videos/{filename}` | Fetch the source video |
+| `GET` | `/results/{filename}` | Download the result CSV |
+
+```json
+// while running
+{ "status": "processing" }
+
+// on success
+{ "status": "done", "result": "results/video_FF0000_100.csv" }
+
+// on failure
+{ "status": "error", "error": "Job timed out after 10m" }
 ```
 
-### Option 2: In-memory H2 profile (no PostgreSQL)
-
-```powershell
-java -Dspring.profiles.active=test -jar target/centroid-finder-1.0-SNAPSHOT.jar
-```
-
-## Build & Installation
-
-Build and package with Maven:
-
-```powershell
-mvn clean package
-```
-
-## Testing
-
-```powershell
-# Unit tests
-mvn test
-
-# Integration tests
-mvn -P integration test
-```
-
-## Running the Server
-
-```powershell
-java -jar target/centroid-finder-1.0-SNAPSHOT.jar
-```
-
-Or run the Dockerized API container on `http://localhost:8080` using the commands above.
-
-Server runs at `http://localhost:8080`.
-
-## Running the Video Processing CLI
-
-```powershell
-# Analyze video and write centroid CSV
-java -jar target/centroid-finder-1.0-SNAPSHOT-jar-with-dependencies.jar input.mp4 output.csv FF0000 100
-
-# Extract first frame as a JPEG thumbnail
-java -jar target/centroid-finder-1.0-SNAPSHOT-jar-with-dependencies.jar thumbnail input.mp4 thumbnail.jpg
-```
-
-Arguments: `inputPath outputCsv targetColor(hex) threshold(0-442)`
-
-## API Endpoints
-
-- `GET /api/videos` — list filenames of videos in `VIDEOS_DIR`
-- `GET /thumbnail/{filename}` — returns a JPEG of the first frame
-- `POST /process/{filename}?targetColor=FF0000&threshold=100` — queues a job and returns a job ID
-  ```json
-  { "jobId": "550e8401-e29b-41d4-a716-446655430900" }
-  ```
-- `GET /process/{jobId}/status` — get the current job status and result location
-  ```json
-  // While running:
-  { "status": "processing" }
-
-  // On success:
-  { "status": "done", "result": "results/video_FF0000_100.csv" }
-
-  // On failure:
-  { "status": "error", "error": "Job timed out after 10m" }
-  ```
-- `GET /videos/{filename}` — access the video file
-- `GET /results/{filename}` — download the result CSV
-
-### Example Output CSV Data
+Output CSV — one row per second, `-1,-1` where nothing matched:
 
 ```
 timestamp,x,y
@@ -142,25 +107,112 @@ timestamp,x,y
 3,-1,-1
 ```
 
-Each row represents one second of the video. The x and y coordinates `-1,-1` is returned when no matching pixels are detected.
+---
 
-## Environment Variables
+## Running it
 
-- `VIDEOS_DIR` (default `./videos`) — path to videos
-- `RESULTS_DIR` (default `./results`) — path to CSVs
-- `SPRING_DATASOURCE_URL` (default `jdbc:postgresql://localhost:5432/centroid_finder`)
-- `SPRING_DATASOURCE_USERNAME` (default `postgres`)
-- `SPRING_DATASOURCE_PASSWORD` (default `postgres`)
-- `JOB_TIMEOUT` (default `10m`) — sets the max time a job can run
+Requires Java 17+, Maven, and Docker.
+
+```bash
+mvn clean package
+```
+
+That produces three artifacts in `target/`, and picking the wrong one is the
+easiest way to lose ten minutes:
+
+| Jar | What it is |
+|---|---|
+| `…-boot.jar` | The Spring Boot server. This is the one you run. |
+| `…-jar-with-dependencies.jar` | The standalone video-processing CLI, also what the server spawns per job. |
+| `…-SNAPSHOT.jar` | Plain classes, no manifest and no dependencies. Not runnable on its own. |
+
+**With PostgreSQL:**
+
+```bash
+docker compose up -d
+```
+
+```bash
+java -jar target/centroid-finder-1.0-SNAPSHOT-boot.jar
+```
+
+**Without PostgreSQL** — in-memory H2, nothing else to start:
+
+```bash
+java -Dspring.profiles.active=test -jar target/centroid-finder-1.0-SNAPSHOT-boot.jar
+```
+
+Either way the server comes up on `http://localhost:8080`.
+
+**As a CLI, no server involved:**
+
+```bash
+java -jar target/centroid-finder-1.0-SNAPSHOT-jar-with-dependencies.jar input.mp4 output.csv FF0000 100
+```
+
+Arguments are `inputPath outputCsv targetColor(hex) threshold(0-442)`.
+
+### Configuration
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `VIDEOS_DIR` | `./videos` | Where source videos are read from |
+| `RESULTS_DIR` | `./results` | Where result CSVs are written |
+| `JOB_TIMEOUT` | `10m` | Wall-clock limit before a job subprocess is destroyed |
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5432/centroid_finder` | |
+| `SPRING_DATASOURCE_USERNAME` | `postgres` | |
+| `SPRING_DATASOURCE_PASSWORD` | `postgres` | |
+
+---
+
+## Tests
+
+163 JUnit 5 tests across 15 classes, split into two profiles.
+
+```bash
+mvn test
+```
+
+```bash
+mvn -P integration test
+```
+
+Unit tests cover the algorithm in isolation — colour distance, binarisation,
+connected-group discovery, CSV formatting, CLI argument parsing. Integration tests
+exercise the job repository against a real PostgreSQL and the controller through the
+Spring context. Both run on every push and pull request, and gate the deploy
+workflow (`.github/workflows/_ci.yml`).
+
+---
 
 ## Deployment
 
-This project is deployed to AWS with [Terraform](https://www.terraform.io/). Infrastructure is defined under `terraform/` (ECS Fargate for the application, RDS PostgreSQL, and supporting networking). The React frontend lives in [Salamander-Labs](https://github.com/konradkelly/Salamander-Labs); use `frontend-infra-template/` to deploy it (S3 + CloudFront). See [`terraform/README.md`](terraform/README.md) for bootstrap and deployment steps.
+Infrastructure is Terraform, under `terraform/`: ECS Fargate for the API, RDS
+PostgreSQL, EFS for video and result storage, an ALB, ECR, and GitHub OIDC roles so
+CI deploys without long-lived AWS keys. See [`terraform/README.md`](terraform/README.md).
 
-## Contributing
+The React frontend is a separate repository —
+[Salamander-Labs](https://github.com/konradkelly/Salamander-Labs) — deployed to
+S3 + CloudFront using `frontend-infra-template/`.
 
-Pull requests are welcome. For bigger changes, open an issue first.
+The AWS environment is not kept running continuously; an idle Fargate service plus
+RDS is real money for a demo. `.github/workflows/deploy.yml` is therefore manual
+trigger only, and documents how to bring the environment back up.
 
-Make sure to update or add JUnit tests before submitting.
+Design notes live in [`docs/`](docs/): the
+[AWS deployment spec](docs/aws-deployment-spec.md), the
+[backend](docs/backend-deployment.md) and [frontend](docs/frontend-deployment.md)
+deployment guides, and a note on the
+[video frame reader factory](docs/video-frame-reader-factory.md).
 
-Developed by Konrad Kelly and Fredrick Karau 2026
+---
+
+## Notes
+
+The hard part was never the depth-first search. It was that the correct threshold
+depends on lighting, on the animal's own colour variation, and on what else happens
+to be in frame — and there is no value that works for every video. The GIF at the
+top is the honest version of that: a parameter sweep, not a solved problem.
+
+Built with [Fredrick Karau](https://github.com/Fkarau), starting from a course
+skeleton. Sample footage is of an ensantina salamander.
