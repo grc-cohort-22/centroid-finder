@@ -1,9 +1,7 @@
 package io.github.nadia5129.centroidfinder;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.List;
 
 public class DfsBinaryGroupFinder implements BinaryGroupFinder {
@@ -60,59 +58,60 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
             }
         }
 
-        boolean[][] visited = new boolean[image.length][image[0].length];
-        Deque<Coordinate> workDeque = new ArrayDeque<>();
+        int height = image.length;
+        int width = image[0].length;
+
+        //Every pixel gets one number: index = y * width + x. From an index we can get the
+        //position back with x = index % width and y = index / width. Keeping plain ints on
+        //the stack (instead of a new Coordinate object for every pixel) is much faster.
+        boolean[] visited = new boolean[height * width];
+        //A pixel is marked visited when it is pushed, so each pixel is pushed at most once
+        //and the stack never needs more than height * width places.
+        int[] stack = new int[height * width];
 
         List<Group> groups = new ArrayList<>();
-        
+
         //Go through every pixel
-        for (int row = 0; row < image.length; row++){
-            for (int col = 0; col < image[row].length; col++){
-                if (image[row][col] == 1 && visited[row][col] == false){
-                    visited[row][col] = true;
-                    workDeque.push(new Coordinate(col, row));
+        for (int row = 0; row < height; row++){
+            for (int col = 0; col < width; col++){
+                int start = row * width + col;
+                if (image[row][col] == 1 && !visited[start]){
+                    visited[start] = true;
+                    int top = 0; //how many pixels are on the stack
+                    stack[top++] = start;
                     int count = 0;
                     int sumX = 0;
                     int sumY = 0;
-                    while(!workDeque.isEmpty()){                            Coordinate currentPixel = workDeque.pop();
-                          count++;
-                        sumX += currentPixel.x();
-                        sumY += currentPixel.y();
-                        //right neighbor check
-                       int nx = currentPixel.x() + 1;
-                        int ny = currentPixel.y();
-                        if (ny >= 0 && ny < image.length && nx >= 0 && nx < image[0].length && image[ny][nx] == 1 && visited[ny][nx] == false ){
-                        visited[ny][nx] = true;
-                            workDeque.push(new Coordinate(nx, ny));
-                        }
-                        //left neighbor check
-                        nx = currentPixel.x() - 1;
-                        ny = currentPixel.y();
-                        if (ny >= 0 && ny < image.length && nx >= 0 && nx < image[0].length && image[ny][nx] == 1 && visited[ny][nx] == false ){
-                            visited[ny][nx] = true;
-                            workDeque.push(new Coordinate(nx, ny));
-                        }
-                        //down neighbor check
-                        nx = currentPixel.x();
-                        ny = currentPixel.y() + 1;
-                        if (ny >= 0 && ny < image.length && nx >= 0 && nx < image[0].length && image[ny][nx] == 1 && visited[ny][nx] == false ){
-                                visited[ny][nx] = true;
-                                workDeque.push(new Coordinate(nx, ny));
-                            }
-                            //above neighbor check
-                            nx = currentPixel.x();
-                            ny = currentPixel.y() - 1;
-                            if (ny >= 0 && ny < image.length && nx >= 0 && nx < image[0].length && image[ny][nx] == 1 && visited[ny][nx] == false ){
-                                visited[ny][nx] = true;
-                                workDeque.push(new Coordinate(nx, ny));
-                            }
-                        }
-                        groups.add(new Group(count, new Coordinate(sumX / count, sumY / count)));
+                    while (top > 0){
+                        int index = stack[--top]; //pop
+                        int x = index % width;
+                        int y = index / width;
+                        count++;
+                        sumX += x;
+                        sumY += y;
+                        //right, left, down and up neighbors (the same order as before)
+                        if (x + 1 < width) top = pushIfWhite(image, visited, stack, top, x + 1, y, width);
+                        if (x - 1 >= 0) top = pushIfWhite(image, visited, stack, top, x - 1, y, width);
+                        if (y + 1 < height) top = pushIfWhite(image, visited, stack, top, x, y + 1, width);
+                        if (y - 1 >= 0) top = pushIfWhite(image, visited, stack, top, x, y - 1, width);
                     }
+                    groups.add(new Group(count, new Coordinate(sumX / count, sumY / count)));
                 }
             }
-            Collections.sort(groups, Collections.reverseOrder());
+        }
+        Collections.sort(groups, Collections.reverseOrder());
         return groups;
     }
-    
+
+    //Pushes pixel (x, y) onto the stack if it is white and not visited yet.
+    //Returns the new number of pixels on the stack.
+    private static int pushIfWhite(int[][] image, boolean[] visited, int[] stack, int top, int x, int y, int width) {
+        int index = y * width + x;
+        if (image[y][x] == 1 && !visited[index]) {
+            visited[index] = true;
+            stack[top] = index;
+            return top + 1;
+        }
+        return top;
+    }
 }

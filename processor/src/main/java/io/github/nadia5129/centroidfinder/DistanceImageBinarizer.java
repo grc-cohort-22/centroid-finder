@@ -51,19 +51,43 @@ public class DistanceImageBinarizer implements ImageBinarizer {
         int height = image.getHeight();
         int[][] binaryArray = new int[height][width];
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int pixelColor = image.getRGB(x, y) & 0xFFFFFF;
-                double distance = distanceFinder.distance(pixelColor, targetColor);
-
-                if (distance < threshold) {
-                    binaryArray[y][x] = 1;
-                } else {
-                    binaryArray[y][x] = 0;
+        //Fastest way, for video frames: JavaCV frames are TYPE_3BYTE_BGR, so we read each
+        //pixel's blue, green and red bytes straight from the image's byte[]. This gives the
+        //same 0xRRGGBB as getRGB, without Java converting every pixel through a color model.
+        if (BgrImages.isPlainBgrImage(image)) {
+            byte[] bytes = BgrImages.bytes(image);
+            int pixel = 0; //pixel number: 0 is the top left, then left to right, row by row
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    binaryArray[y][x] = binarize(BgrImages.rgbAt(bytes, pixel));
+                    pixel++;
                 }
+            }
+            return binaryArray;
+        }
+
+        //Any other kind of image: one row of pixels at a time. Reading a whole row with one
+        //getRGB call is faster than calling getRGB(x, y) for every pixel, and gives exactly
+        //the same colors. row is a local variable, so every call (and every thread) gets its own array.
+        int[] row = new int[width];
+
+        for (int y = 0; y < height; y++) {
+            //fills row[0] to row[width - 1] with the colors of row y
+            image.getRGB(0, y, width, 1, row, 0, width);
+            for (int x = 0; x < width; x++) {
+                binaryArray[y][x] = binarize(row[x] & 0xFFFFFF);
             }
         }
         return binaryArray;
+    }
+
+    //1 (white) if the color is closer to the target than the threshold, otherwise 0 (black)
+    private int binarize(int pixelColor) {
+        double distance = distanceFinder.distance(pixelColor, targetColor);
+        if (distance < threshold) {
+            return 1;
+        }
+        return 0;
     }
 
     /**
