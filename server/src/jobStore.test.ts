@@ -19,6 +19,7 @@ describe("FakeJobStore", () => {
             status: "processing",
             result: null,
             error: null,
+            createdAt: expect.any(Date),
         });
     });
 
@@ -53,5 +54,38 @@ describe("FakeJobStore", () => {
         const job = await store.findJob("not-a-real-id");
         // Assert
         expect(job).toBeUndefined();
+    });
+
+    it("lists jobs newest first", async () => {
+        // Arrange
+        const store = new FakeJobStore();
+        await store.createJob("old-job", "intro.mp4", "ff0000", 120);
+        await store.createJob("new-job", "demo.mov", "00ff00", 80);
+        // Act
+        const jobs = await store.listJobs();
+        // Assert
+        expect(jobs.map((job) => job.id)).toEqual(["new-job", "old-job"]);
+    });
+
+    it("sorts jobs by createdAt, not by the order they were added", async () => {
+        // Arrange: the job added second is older
+        const store = new FakeJobStore();
+        await store.createJob("job-a", "intro.mp4", "ff0000", 120);
+        await store.createJob("job-b", "intro.mp4", "ff0000", 120);
+        const jobB = store.jobs.get("job-b");
+        if (jobB) jobB.createdAt = new Date("2020-01-01T00:00:00Z");
+        // Act
+        const jobs = await store.listJobs();
+        // Assert
+        expect(jobs.map((job) => job.id)).toEqual(["job-a", "job-b"]);
+    });
+
+    it("lists no jobs when there are none", async () => {
+        // Arrange
+        const store = new FakeJobStore();
+        // Act
+        const jobs = await store.listJobs();
+        // Assert
+        expect(jobs).toEqual([]);
     });
 });

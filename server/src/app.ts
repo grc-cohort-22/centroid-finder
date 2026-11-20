@@ -6,6 +6,12 @@ import type { JobStore } from "./jobStore.js";
 import type { runInBackground } from "./jarRunner.js";
 import { processRoute } from "./processRoute.js";
 import {statusRoute} from "./statusRoute.js";
+import { jobsRoute } from "./jobsRoute.js";
+import { videoDetailsRoute } from "./videoDetailsRoute.js";
+import { frameRoute } from "./frameRoute.js";
+import { uploadRoute } from "./uploadRoute.js";
+import { healthRoute } from "./healthRoute.js";
+import { isVideoFile } from "./videoInfo.js";
 
 
 // The folders the app needs. index.ts reads them from .env.
@@ -16,6 +22,8 @@ export type AppConfig ={
     store: JobStore;
     // only tests set this, so they can use a fake instead of really starting java
     run?: typeof runInBackground;
+    // only tests set this, so they can try the "too big" error without a 2 GB file
+    maxUploadBytes?: number;
 
 };
 
@@ -27,15 +35,17 @@ export function createApp(config: AppConfig): Express{
     app.use("/results", express.static(config.resultsDir));
     app.use(processRoute(config));
     app.use(statusRoute(config));
+    app.use(jobsRoute(config));
+    app.use(videoDetailsRoute(config));
+    app.use(frameRoute(config));
+    app.use(uploadRoute(config));
+    app.use(healthRoute());
 
     // GET /api/videos: list the video files in the videos folder
     app.get("/api/videos", async (req, res) => {
         try {
             const files = await fs.readdir(config.videoDir);
-            const videos = files.filter((name) => {
-                const lower = name.toLowerCase();
-                return lower.endsWith(".mp4") || lower.endsWith(".mov");
-            });
+            const videos = files.filter(isVideoFile);
             res.json(videos);
         } catch (error) {
             console.error(error);

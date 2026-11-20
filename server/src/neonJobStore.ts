@@ -12,7 +12,25 @@ type JobRow = {
     status: JobStatus;
     result: string | null;
     error: string | null;
+    created_at: Date;   // pg turns TIMESTAMPTZ into a JavaScript Date
 };
+
+// The columns we read, in the same order as JobRow
+const JOB_COLUMNS = "id, filename, target_color, threshold, status, result, error, created_at";
+
+// turn the database's snake_case row into our camelCase Job
+function rowToJob(row: JobRow): Job {
+    return {
+        id: row.id,
+        filename: row.filename,
+        targetColor: row.target_color,
+        threshold: row.threshold,
+        status: row.status,
+        result: row.result,
+        error: row.error,
+        createdAt: row.created_at,
+    };
+}
 // The real job store. It saves jobs in our Neon database using pg.
 export class NeonJobStore implements JobStore {
     private pool: Pool;
@@ -52,7 +70,7 @@ export class NeonJobStore implements JobStore {
         }
 
         const result = await this.pool.query<JobRow>(
-            "SELECT id, filename, target_color, threshold, status, result, error FROM jobs WHERE id = $1",
+            `SELECT ${JOB_COLUMNS} FROM jobs WHERE id = $1`,
             [id]
         );
 
@@ -62,16 +80,12 @@ export class NeonJobStore implements JobStore {
             return undefined;
         }
 
-        // turn the database's snake_case row into our camelCase Job
-        return {
-            id: row.id,
-            filename: row.filename,
-            targetColor: row.target_color,
-            threshold: row.threshold,
-            status: row.status,
-            result: row.result,
-            error: row.error,
-        };
+        return rowToJob(row);
     }
 
+    async listJobs(): Promise<Job[]> {
+        // DESC = newest first
+        const result = await this.pool.query<JobRow>(`SELECT ${JOB_COLUMNS} FROM jobs ORDER BY created_at DESC`);
+        return result.rows.map(rowToJob);
+    }
 }

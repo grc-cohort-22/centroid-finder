@@ -16,6 +16,7 @@ export class FakeJobStore implements JobStore {
             status: "processing",
             result: null,
             error: null,
+            createdAt: new Date(),
         });
     }
 
@@ -38,5 +39,13 @@ export class FakeJobStore implements JobStore {
     async findJob(id: string): Promise<Job | undefined> {
         // undefined if there's no job with this id
         return this.jobs.get(id);
+    }
+
+    async listJobs(): Promise<Job[]> {
+        // A Map keeps the order jobs were added, so reverse() puts the newest first.
+        // Then sort by createdAt (newest first). Jobs made in the same millisecond keep the reversed order.
+        return [...this.jobs.values()]
+            .reverse()
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     }
 }

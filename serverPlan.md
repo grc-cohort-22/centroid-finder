@@ -103,6 +103,28 @@ Does it need the JAR, ffmpeg, or just files and folders?
 - just the videos folder. We don't write a route for it, express.static shares the whole folder in one line.
 
 
+## Extra endpoints for the frontend's UI upgrade
+These aren't in the API spec. We added new endpoints instead of changing the spec's ones, so GET /api/videos still sends a plain list of names.
+
+| Method and URL | What the client sends | What it sends back | Errors |
+|---|---|---|---|
+| GET /api/videos/details | nothing | 200 `[{ filename, status, durationSeconds?, width?, height? }]` | 500 |
+| GET /api/jobs | nothing | 200 every job, newest first: `[{ jobId, filename, targetColor, threshold, status, startedAt, resultUrl?, error? }]` | 500 |
+| GET /api/jobs/{jobId} | jobId in the path | 200 one job (same shape) | 404, 500 |
+| GET /frame/{filename}?t=2.5 | file name in the path, seconds in t | 200 a PNG of the frame at that time | 400 bad t, 404 t is after the end, 500 |
+| POST /api/videos | multipart form, the file in the field `video` | 201 `{ filename, status: "not-processed", ... }` | 400, 409 name taken, 413 over 2 GB, 415 not .mp4/.mov |
+| GET /api/health | nothing | 200 `{ ok: true, version }` | none |
+
+How they work:
+- videos/details: reads the videos folder like /api/videos, then uses the newest job for each file: done → tracked, processing → processing, error → error, no job → not-processed. ffprobe (with execFile, no shell) adds the length and size; if ffprobe can't read a file, those fields are left out.
+- jobs: the job store has a new listJobs() (`ORDER BY created_at DESC` in Neon). startedAt is the created_at column. There's no finished time yet, because the table has no column for it.
+- frame: like /thumbnail, but `-ss <t>` jumps to that time first, and it's a PNG so the colors are exact. path.basename keeps it inside the videos folder.
+- upload: multer writes the file to disk while it arrives (it never has to fit in memory). It checks the name, the type, and that the name isn't taken before saving anything. The file is saved as `name.<uuid>.part` first and only gets its real name when the whole file has arrived, so half-uploaded videos never show up in /api/videos.
+- health: a quick "is the server up?" check. The version comes from server/package.json.
+
+Tests: jobsRoute, videoDetailsRoute, frameRoute, uploadRoute, healthRoute, and neonJobStore (with a fake pg Pool) `.test.ts` files, run with npm test.
+
+
 ## Questions
 <!-- Things we don't understand yet, or want to ask the professor -->
 - The jobs are shared in Neon, but each CSV is saved on the laptop that ran the JAR. If my partner looks up my job, it says done, but their server doesn't have the file. Is that OK?
