@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -51,10 +52,13 @@ public class VideoSummaryAppTest {
         }
     }
 
-    // A pretend group finder: gives back prepared groups, one list per call, in order
+    // A pretend group finder: gives back prepared groups, one list per frame.
+    // It knows which frame it was given from the frame number stored in pixel (0,0),
+    // because the frames are processed on several threads and can arrive in any order.
+    // The list is synchronized so several threads can add to it safely.
     private static class FakeGroupFinder implements ImageGroupFinder {
         private final List<List<Group>> results;
-        final List<BufferedImage> imagesSeen = new ArrayList<>();
+        final List<BufferedImage> imagesSeen = Collections.synchronizedList(new ArrayList<>());
 
         FakeGroupFinder(List<List<Group>> results) {
             this.results = results;
@@ -63,20 +67,28 @@ public class VideoSummaryAppTest {
         @Override
         public List<Group> findConnectedGroups(BufferedImage image) {
             imagesSeen.add(image);
-            return results.get(imagesSeen.size() - 1);
+            return results.get(frameNumberOf(image));
         }
     }
 
-    // Small blank images. The fake group finder ignores what is in them.
-    private BufferedImage blankImage() {
-        return new BufferedImage(2, 2, BufferedImage.TYPE_INT_RGB);
+    // A small image with its frame number stored in pixel (0,0)
+    private static BufferedImage frameImage(int frameNumber) {
+        BufferedImage image = new BufferedImage(2, 2, BufferedImage.TYPE_INT_RGB);
+        image.setRGB(0, 0, frameNumber);
+        return image;
     }
 
-    // Runs the loop with fakes and returns the CSV text it wrote
+    // Reads back the frame number stored by frameImage
+    private static int frameNumberOf(BufferedImage image) {
+        return image.getRGB(0, 0) & 0xFFFFFF;
+    }
+
+    // Runs the loop with fakes and returns the CSV text it wrote.
+    // Every worker thread gets its own tracker, all using the same (thread-safe) fake finder.
     private String runLoop(FrameReader reader, ImageGroupFinder groupFinder) throws IOException {
         StringWriter output = new StringWriter();
         CSVOutputWriter writer = new CSVOutputWriter(output);
-        VideoSummaryApp.processFrames(reader, new ImageCentroidTracker(groupFinder), writer);
+        VideoSummaryApp.processFrames(reader, () -> new ImageCentroidTracker(groupFinder), writer);
         writer.close();
         return output.toString();
     }
@@ -85,7 +97,7 @@ public class VideoSummaryAppTest {
     @Test
     void processFrames_oneFrameOneGroup_writesOneRow() throws IOException {
         // Arrange
-        FrameReader reader = new FakeFrameReader(List.of(blankImage()));
+        FrameReader reader = new FakeFrameReader(List.of(frameImage(0)));
         ImageGroupFinder groupFinder = new FakeGroupFinder(List.of(
             List.of(new Group(10, new Coordinate(5, 7)))));
 
@@ -100,7 +112,7 @@ public class VideoSummaryAppTest {
     @Test
     void processFrames_manyFrames_writesOneRowPerFrameInOrder() throws IOException {
         // Arrange
-        FrameReader reader = new FakeFrameReader(List.of(blankImage(), blankImage(), blankImage()));
+        FrameReader reader = new FakeFrameReader(List.of(frameImage(0), frameImage(1), frameImage(2)));
         ImageGroupFinder groupFinder = new FakeGroupFinder(List.of(
             List.of(new Group(10, new Coordinate(1, 2))),
             List.of(new Group(10, new Coordinate(3, 4))),
@@ -117,7 +129,7 @@ public class VideoSummaryAppTest {
     @Test
     void processFrames_frameWithNoGroups_writesNegativeOnesAndContinues() throws IOException {
         // Arrange
-        FrameReader reader = new FakeFrameReader(List.of(blankImage(), blankImage(), blankImage()));
+        FrameReader reader = new FakeFrameReader(List.of(frameImage(0), frameImage(1), frameImage(2)));
         ImageGroupFinder groupFinder = new FakeGroupFinder(List.of(
             List.of(new Group(10, new Coordinate(1, 2))),
             List.of(),
@@ -134,7 +146,7 @@ public class VideoSummaryAppTest {
     @Test
     void processFrames_frameWithManyGroups_writesOnlyLargest() throws IOException {
         // Arrange
-        FrameReader reader = new FakeFrameReader(List.of(blankImage()));
+        FrameReader reader = new FakeFrameReader(List.of(frameImage(0)));
         ImageGroupFinder groupFinder = new FakeGroupFinder(List.of(List.of(
             new Group(50, new Coordinate(8, 9)),
             new Group(3, new Coordinate(1, 1)))));
@@ -160,12 +172,13 @@ public class VideoSummaryAppTest {
         assertEquals("", csv);
     }
 
-    // The loop must give the group finder the actual frames from the video, in order
+    // The loop must give the group finder a copy of every frame from the video
+    // (a copy, because the real video reader reuses the same image for every frame)
     @Test
-    void processFrames_manyFrames_passesEachFrameToGroupFinder() throws IOException {
+    void processFrames_manyFrames_passesCopyOfEachFrameToGroupFinder() throws IOException {
         // Arrange
-        BufferedImage first = blankImage();
-        BufferedImage second = blankImage();
+        BufferedImage first = frameImage(0);
+        BufferedImage second = frameImage(1);
         FrameReader reader = new FakeFrameReader(List.of(first, second));
         FakeGroupFinder groupFinder = new FakeGroupFinder(List.of(List.of(), List.of()));
 
@@ -174,8 +187,25 @@ public class VideoSummaryAppTest {
 
         // Assert
         assertEquals(2, groupFinder.imagesSeen.size());
-        assertSame(first, groupFinder.imagesSeen.get(0));
-        assertSame(second, groupFinder.imagesSeen.get(1));
+        List<Integer> frameNumbersSeen = new ArrayList<>();
+        for (BufferedImage image : groupFinder.imagesSeen) {
+            assertNotSame(first, image);
+            assertNotSame(second, image);
+            frameNumbersSeen.add(frameNumberOf(image));
+        }
+        Collections.sort(frameNumbersSeen);
+        assertEquals(List.of(0, 1), frameNumbersSeen);
+    }
+
+    // Each call builds a brand new tracker, so worker threads never share one
+    @Test
+    void buildTracker_calledTwice_returnsDifferentTrackers() {
+        // Act
+        ImageCentroidTracker first = VideoSummaryApp.buildTracker(0xFF0000, 50);
+        ImageCentroidTracker second = VideoSummaryApp.buildTracker(0xFF0000, 50);
+
+        // Assert
+        assertNotSame(first, second);
     }
 
     // A problem reading the video should not be hidden by the loop
