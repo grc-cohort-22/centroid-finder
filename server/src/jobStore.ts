@@ -10,6 +10,7 @@ export type Job = {
     status: JobStatus;
     result: string | null;   // path to the CSV, null until the job is done
     error: string | null;    // error message, null unless the job failed
+    createdAt: Date;         // when the job was started (created_at in the table)
 };
 
 // Everything a job store can do.
@@ -19,4 +20,6 @@ export interface JobStore {
     markDone(id: string, resultPath: string): Promise<void>;
     markError(id: string, message: string): Promise<void>;
     findJob(id: string): Promise<Job | undefined>;
+    // every job, newest first
+    listJobs(): Promise<Job[]>;
 }
